@@ -7,16 +7,27 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
     try {
-        await req.json();
-        // const { categories, items, transactions } = data;
+        const body = await req.json();
+        const { categories, items, transactions } = body;
 
-        // TODO: Perform bulk upsert to D1 database
-        // This part requires environment-specific D1 binding
-        // Example: await process.env.DB.prepare('...').run()
+        console.log('Syncing data:', {
+            categoriesCount: categories?.length || 0,
+            itemsCount: items?.length || 0,
+            transactionsCount: transactions?.length || 0
+        });
 
-        return NextResponse.json({ success: true, message: 'Sync complete' });
+        // TODO: Implement D1 persistence logic here
+        // For now, we acknowledges the request
+
+        return NextResponse.json({
+            success: true,
+            message: 'Sync received'
+        });
     } catch (err) {
         console.error('Sync Error:', err);
-        return NextResponse.json({ success: false, error: 'Sync failed' }, { status: 500 });
+        return NextResponse.json({
+            success: false,
+            error: err instanceof Error ? err.message : 'Sync failed'
+        }, { status: 500 });
     }
 }
