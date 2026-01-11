@@ -280,43 +280,51 @@ export default function ItemsPage() {
             ) : (
                 <div className="space-y-3">
                     {items.map((item) => (
-                        <div key={item.id} className="card flex items-center gap-3 sm:gap-6 !p-4 sm:!p-6">
-                            <div className="p-3 sm:p-4 bg-slate-100 rounded-xl sm:rounded-2xl shrink-0">
-                                <Package className="w-6 h-6 sm:w-10 sm:h-10 text-slate-400" />
+                        <div key={item.id} className="card flex items-start sm:items-center gap-3 sm:gap-6 !p-3 sm:!p-6 group">
+                            <div className="p-2 sm:p-4 bg-slate-100 rounded-lg sm:rounded-2xl shrink-0">
+                                <Package className="w-5 h-5 sm:w-10 sm:h-10 text-slate-400" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="text-[10px] sm:text-xs font-bold bg-slate-200 px-2 py-0.5 rounded uppercase text-slate-600">
+                                <div className="flex items-center gap-2 flex-wrap mb-1">
+                                    <span className="text-[8px] sm:text-xs font-bold bg-slate-200 px-1.5 py-0.5 rounded uppercase text-slate-600 font-mono">
                                         {item.code}
                                     </span>
-                                    <span className="text-[10px] sm:text-xs font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded">
-                                        {item.categoryName || 'No Category'}
-                                    </span>
+                                    {item.categoryName && (
+                                        <span className="text-[8px] sm:text-xs font-bold bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded uppercase truncate max-w-[100px] sm:max-w-none">
+                                            {item.categoryName}
+                                        </span>
+                                    )}
                                 </div>
-                                <h3 className="text-lg sm:text-2xl font-bold text-slate-800 truncate">{item.name}</h3>
+                                <h3 className="text-sm sm:text-2xl font-bold text-slate-800 truncate sm:whitespace-normal group-hover:text-blue-600 transition-colors">
+                                    {item.name}
+                                </h3>
                                 {item.price > 0 && (
-                                    <p className="text-xs sm:text-sm text-slate-500">{formatPrice(item.price)}</p>
+                                    <p className="text-[10px] sm:text-sm text-slate-500 font-medium">
+                                        Harga: <span className="font-bold">{formatPrice(item.price)}</span>
+                                    </p>
                                 )}
                             </div>
-                            <div className="text-right shrink-0">
-                                <p className="text-[10px] sm:text-xs font-bold text-slate-400">STOK</p>
-                                <p className={`text-2xl sm:text-4xl font-black ${item.currentStock < 5 ? 'text-red-600' : 'text-slate-800'}`}>
-                                    {item.currentStock}
-                                </p>
-                            </div>
-                            <div className="flex flex-col gap-1 shrink-0">
-                                <button
-                                    onClick={() => startEdit(item)}
-                                    className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
-                                >
-                                    <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
-                                </button>
-                                <button
-                                    onClick={() => setDeleteTarget(item)}
-                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                                >
-                                    <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                                </button>
+                            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-6 shrink-0">
+                                <div className="text-right">
+                                    <p className="text-[8px] sm:text-xs font-bold text-slate-400 uppercase tracking-tighter">STOK</p>
+                                    <p className={`text-xl sm:text-4xl font-black leading-none ${item.currentStock < 5 ? 'text-red-500' : 'text-slate-800'}`}>
+                                        {item.currentStock}
+                                    </p>
+                                </div>
+                                <div className="flex flex-col gap-1 shrink-0">
+                                    <button
+                                        onClick={() => startEdit(item)}
+                                        className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
+                                    >
+                                        <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
+                                    </button>
+                                    <button
+                                        onClick={() => setDeleteTarget(item)}
+                                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                                    >
+                                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}

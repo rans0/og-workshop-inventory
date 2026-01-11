@@ -174,11 +174,16 @@ export default function CategoriesPage() {
                                 <Link href={`/categories/${cat.id}`} className="flex items-center justify-between">
                                     <div className="flex-1 min-w-0">
                                         <h3 className="text-lg sm:text-xl font-bold text-slate-700 truncate">{cat.name}</h3>
-                                        <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
-                                            <Package className="w-4 h-4" />
-                                            <span>{cat.itemCount} barang</span>
-                                            <span>•</span>
-                                            <span>Stok: {cat.totalStock} pcs</span>
+                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] sm:text-sm text-slate-500 mt-1 font-medium">
+                                            <div className="flex items-center gap-1">
+                                                <Package className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400" />
+                                                <span>{cat.itemCount} barang</span>
+                                            </div>
+                                            <span className="hidden sm:inline text-slate-300">•</span>
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-slate-400 uppercase text-[8px] sm:text-[10px] font-bold">Total Stok:</span>
+                                                <span className="font-bold text-slate-700">{cat.totalStock} pcs</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1 shrink-0">

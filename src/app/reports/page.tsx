@@ -208,32 +208,32 @@ export default function ReportsPage() {
             ) : (
                 <>
                     {/* Grand Total Cards */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="card border-blue-100 bg-blue-50/30 !p-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-2">
+                        <div className="card border-blue-100 bg-blue-50/20 !p-3 sm:!p-4">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                                    <Package className="w-5 h-5" />
+                                <div className="p-2 sm:p-3 bg-blue-100/50 text-blue-600 rounded-xl shrink-0">
+                                    <Package className="w-5 h-5 sm:w-6 sm:h-6" />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-[10px] font-bold text-blue-800 uppercase tracking-tight">Uang Modal (Belanja)</p>
+                                    <p className="text-[9px] sm:text-[10px] font-bold text-blue-800 uppercase tracking-tight opacity-70">Uang Modal (Belanja)</p>
                                     <p className="text-xl sm:text-2xl font-black text-blue-600 leading-none">
                                         {formatPrice(grandTotalInValue)}
                                     </p>
-                                    <p className="text-[10px] text-blue-700 font-medium truncate mt-1">+{grandTotalIn} pcs masuk</p>
+                                    <p className="text-[10px] text-blue-700 font-bold truncate mt-1">+{grandTotalIn} pcs masuk</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="card border-orange-100 bg-orange-50/30 !p-4">
+                        <div className="card border-orange-100 bg-orange-50/20 !p-3 sm:!p-4">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
-                                    <TrendingDown className="w-5 h-5" />
+                                <div className="p-2 sm:p-3 bg-orange-100/50 text-orange-600 rounded-xl shrink-0">
+                                    <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6" />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-[10px] font-bold text-orange-800 uppercase tracking-tight">Uang Keluar (Pemakaian)</p>
+                                    <p className="text-[9px] sm:text-[10px] font-bold text-orange-800 uppercase tracking-tight opacity-70">Uang Keluar (Pemakaian)</p>
                                     <p className="text-xl sm:text-2xl font-black text-orange-600 leading-none">
                                         {formatPrice(grandTotalOutValue)}
                                     </p>
-                                    <p className="text-[10px] text-orange-700 font-medium truncate mt-1">-{grandTotalOut} pcs keluar</p>
+                                    <p className="text-[10px] text-orange-700 font-bold truncate mt-1">-{grandTotalOut} pcs keluar</p>
                                 </div>
                             </div>
                         </div>
@@ -251,45 +251,34 @@ export default function ReportsPage() {
                                     {/* Category Header (Clickable) */}
                                     <button
                                         onClick={() => toggleCategory(cat.categoryId)}
-                                        className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors bg-white"
+                                        className="w-full p-4 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-slate-50 transition-colors bg-white gap-4"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold uppercase">
+                                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold uppercase shrink-0">
                                                 {cat.categoryName.charAt(0)}
                                             </div>
-                                            <div className="text-left">
-                                                <h3 className="font-bold text-slate-800 leading-tight">{cat.categoryName}</h3>
+                                            <div className="text-left min-w-0">
+                                                <h3 className="font-bold text-slate-800 leading-tight truncate">{cat.categoryName}</h3>
                                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{cat.items.length} Barang</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-6">
-                                            <div className="text-right hidden sm:block">
-                                                <div className="flex gap-4 text-xs font-bold">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Masuk</span>
-                                                        <span className="text-green-600">+{cat.totalIn}</span>
-                                                    </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Keluar</span>
-                                                        <span className="text-red-600">-{cat.totalOut}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="text-right flex items-center gap-4 sm:gap-6">
-                                                <div className="flex flex-col items-end">
+
+                                        <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
+                                            <div className="flex items-center gap-4 sm:gap-6">
+                                                <div className="flex flex-col items-start sm:items-end">
                                                     <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Uang Modal</span>
                                                     <p className="font-bold text-sm text-blue-600">
                                                         {formatPrice(cat.totalInValue)}
                                                     </p>
                                                 </div>
-                                                <div className="flex flex-col items-end">
+                                                <div className="flex flex-col items-start sm:items-end">
                                                     <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Uang Keluar</span>
                                                     <p className="font-bold text-sm text-orange-600">
                                                         {formatPrice(cat.totalOutValue)}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className={`p-1 rounded-full transition-transform ${cat.expanded ? 'bg-slate-100' : ''}`}>
+                                            <div className={`p-1 rounded-full transition-transform ${cat.expanded ? 'bg-slate-100 rotate-180 sm:rotate-0' : ''}`}>
                                                 {cat.expanded ? (
                                                     <ChevronUp className="w-5 h-5 text-slate-500" />
                                                 ) : (
@@ -303,40 +292,45 @@ export default function ReportsPage() {
                                     {cat.expanded && (
                                         <div className="border-t border-slate-100 bg-slate-50/50">
                                             {/* List Header */}
-                                            <div className="px-4 py-2 border-b border-slate-100 flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                            <div className="px-4 py-2 border-b border-slate-100 flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-100/50">
                                                 <span className="flex-1">Barang</span>
-                                                <div className="flex gap-4 sm:gap-6 shrink-0 w-[240px] sm:w-[320px] justify-end">
-                                                    <span className="w-10 text-center">Masuk</span>
-                                                    <span className="w-10 text-center">Keluar</span>
-                                                    <span className="w-[80px] sm:w-[100px] text-right">Uang Modal</span>
-                                                    <span className="w-[80px] sm:w-[100px] text-right">Uang Keluar</span>
+                                                <div className="flex gap-3 sm:gap-6 shrink-0 justify-end">
+                                                    <span className="w-8 text-center hidden sm:block">Masuk</span>
+                                                    <span className="w-8 text-center hidden sm:block">Keluar</span>
+                                                    <span className="w-20 sm:w-[100px] text-right">Uang Modal</span>
+                                                    <span className="w-20 sm:w-[100px] text-right">Uang Keluar</span>
                                                 </div>
                                             </div>
 
                                             {cat.items.map(item => (
-                                                <div key={item.id} className="p-4 border-b border-slate-100 last:border-b-0 flex items-center justify-between hover:bg-white/50 transition-colors">
+                                                <div key={item.id} className="p-3 sm:p-4 border-b border-slate-100 last:border-b-0 flex items-center justify-between hover:bg-white/50 transition-colors gap-3">
                                                     <div className="min-w-0 flex-1">
                                                         <p className="font-bold text-sm text-slate-700 truncate">{item.name}</p>
-                                                        <p className="text-[10px] font-mono text-slate-400">{item.code}</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="text-[10px] font-mono text-slate-400">{item.code}</p>
+                                                            <span className="text-[10px] text-slate-300 sm:hidden">
+                                                                (In: {item.inQty} | Out: {item.outQty})
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex gap-4 sm:gap-6 shrink-0 w-[240px] sm:w-[320px] justify-end items-center">
-                                                        <div className="w-10 text-center">
+                                                    <div className="flex gap-3 sm:gap-6 shrink-0 justify-end items-center">
+                                                        <div className="w-8 text-center hidden sm:block">
                                                             <p className={`font-bold ${item.inQty > 0 ? 'text-green-600' : 'text-slate-300'}`}>
                                                                 {item.inQty}
                                                             </p>
                                                         </div>
-                                                        <div className="w-10 text-center">
+                                                        <div className="w-8 text-center hidden sm:block">
                                                             <p className={`font-bold ${item.outQty > 0 ? 'text-red-600' : 'text-slate-300'}`}>
                                                                 {item.outQty}
                                                             </p>
                                                         </div>
-                                                        <div className="w-[80px] sm:w-[100px] text-right">
-                                                            <p className={`font-bold text-sm ${item.inQty > 0 ? 'text-blue-600' : 'text-slate-300'}`}>
+                                                        <div className="w-20 sm:w-[100px] text-right">
+                                                            <p className={`font-bold text-xs sm:text-sm ${item.inQty > 0 ? 'text-blue-600' : 'text-slate-300'}`}>
                                                                 {formatPrice(item.inValue).replace('Rp', '').trim()}
                                                             </p>
                                                         </div>
-                                                        <div className="w-[80px] sm:w-[100px] text-right">
-                                                            <p className={`font-bold text-sm ${item.outQty > 0 ? 'text-orange-700' : 'text-slate-300'}`}>
+                                                        <div className="w-20 sm:w-[100px] text-right">
+                                                            <p className={`font-bold text-xs sm:text-sm ${item.outQty > 0 ? 'text-orange-700' : 'text-slate-300'}`}>
                                                                 {formatPrice(item.outValue).replace('Rp', '').trim()}
                                                             </p>
                                                         </div>

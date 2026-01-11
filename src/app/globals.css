@@ -44,7 +44,7 @@ body {
 
 /* Card Styles */
 .card {
-  @apply bg-white rounded-3xl p-6 shadow-sm border border-slate-200;
+  @apply bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200;
 }
 
 /* Input Styles */

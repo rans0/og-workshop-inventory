@@ -221,34 +221,45 @@ export default function CategoryDetailPage({ params }: { params: Promise<{ id: s
                     <p className="text-center text-slate-400 py-10 italic">Belum ada barang di kategori ini.</p>
                 ) : (
                     category.items.map((item) => (
-                        <div key={item.id} className="p-4 bg-white rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                        <div key={item.id} className="p-3 sm:p-5 bg-white rounded-2xl shadow-sm border border-slate-200 flex items-start sm:items-center justify-between gap-3 group">
                             <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                    <Package className="w-4 h-4 text-blue-500" />
-                                    <h3 className="font-bold text-slate-700 truncate">{item.name}</h3>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <div className="p-1.5 bg-slate-100 rounded-lg shrink-0">
+                                        <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                                    </div>
+                                    <h3 className="font-bold text-slate-700 truncate sm:text-lg group-hover:text-blue-600 transition-colors">{item.name}</h3>
                                 </div>
-                                <div className="text-sm text-slate-500 mt-1">
-                                    <span className="font-mono">{item.code}</span>
-                                    {item.price > 0 && <span className="ml-2">• {formatPrice(item.price)}</span>}
+                                <div className="text-[10px] sm:text-sm text-slate-400 flex flex-wrap items-center gap-x-2 font-medium">
+                                    <span className="font-mono bg-slate-50 px-1 rounded uppercase">{item.code}</span>
+                                    {item.price > 0 && (
+                                        <>
+                                            <span className="text-slate-200 hidden sm:inline">•</span>
+                                            <span className="text-slate-500">{formatPrice(item.price)}</span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                                <div className="text-right mr-2">
-                                    <p className="text-2xl font-black text-slate-800">{item.currentStock}</p>
-                                    <p className="text-xs text-slate-400">{item.unit}</p>
+                            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-6 shrink-0">
+                                <div className="text-right">
+                                    <p className={`text-xl sm:text-3xl font-black leading-none ${item.currentStock < 5 ? 'text-red-500' : 'text-slate-800'}`}>
+                                        {item.currentStock}
+                                    </p>
+                                    <p className="text-[8px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{item.unit}</p>
                                 </div>
-                                <Link
-                                    href={`/items?edit=${item.id}`}
-                                    className="p-2 text-blue-500 hover:bg-blue-50 rounded-xl"
-                                >
-                                    <Pencil className="w-5 h-5" />
-                                </Link>
-                                <button
-                                    onClick={() => setDeleteTarget(item)}
-                                    className="p-2 text-red-500 hover:bg-red-50 rounded-xl"
-                                >
-                                    <Trash2 className="w-5 h-5" />
-                                </button>
+                                <div className="flex gap-1 shrink-0">
+                                    <Link
+                                        href={`/items?edit=${item.id}`}
+                                        className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100"
+                                    >
+                                        <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
+                                    </Link>
+                                    <button
+                                        onClick={() => setDeleteTarget(item)}
+                                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                                    >
+                                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))
