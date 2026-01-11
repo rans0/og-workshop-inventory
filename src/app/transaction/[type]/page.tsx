@@ -7,6 +7,8 @@ import { ArrowLeft, CheckCircle2, ChevronDown, Package } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 
+export const runtime = 'edge';
+
 export default function TransactionPage() {
     const params = useParams();
     const router = useRouter();

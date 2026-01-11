@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const runtime = 'edge';
+
 // Note: In Cloudflare Pages, the D1 binding is provided via env object
 // For local development, we use wrangler dev or similar.
 // This is a placeholder for the sync logic as the actual D1 binding
