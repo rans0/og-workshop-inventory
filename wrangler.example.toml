@@ -1,6 +1,6 @@
 name = "workshop-inventory"
-compatibility_date = "2024-04-03"
-pages_build_output_dir = ".next"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = ".open-next/cloudflare"
 
 [[d1_databases]]
 binding = "DB"
