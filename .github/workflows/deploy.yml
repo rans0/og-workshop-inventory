@@ -25,7 +25,7 @@ jobs:
       - name: Generate wrangler.toml
         run: |
           cat <<EOF > wrangler.toml
-          name = "workshop-inventory"
+          name = "og-workshop-inventory"
           compatibility_date = "2025-01-01"
           pages_build_output_dir = ".open-next/cloudflare"
 
@@ -49,4 +49,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .open-next/cloudflare --project-name=workshop-inventory
+          command: pages deploy .open-next/cloudflare --project-name=og-workshop-inventory
