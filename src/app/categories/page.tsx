@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, Pencil, Package, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Pencil, Package, ChevronRight, Layers } from 'lucide-react';
 import Link from 'next/link';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
@@ -171,7 +171,10 @@ export default function CategoriesPage() {
                                     </button>
                                 </div>
                             ) : (
-                                <Link href={`/categories/${cat.id}`} className="flex items-center justify-between">
+                                <Link href={`/categories/${cat.id}`} className="flex items-center gap-4">
+                                    <div className="p-3 bg-orange-50 rounded-xl shrink-0">
+                                        <Layers className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
+                                    </div>
                                     <div className="flex-1 min-w-0">
                                         <h3 className="text-lg sm:text-xl font-bold text-slate-700 truncate">{cat.name}</h3>
                                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] sm:text-sm text-slate-500 mt-1 font-medium">

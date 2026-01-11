@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, MinusCircle, Package, History as HistoryIcon, Settings, ArrowRight, TrendingUp, X } from 'lucide-react';
+import { PlusCircle, MinusCircle, Package, History as HistoryIcon, Settings, ArrowRight, TrendingUp, X, Layers } from 'lucide-react';
 import Link from 'next/link';
 
 interface Item {
@@ -119,7 +119,7 @@ export default function Dashboard() {
       {/* Header */}
       <header className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900">Bengkel Saya</h1>
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900">Ratu Motor</h1>
           <p className="text-slate-500 font-medium text-sm sm:text-lg">Inventory & Stok Barang</p>
         </div>
         <Link href="/settings" className="p-2 sm:p-3 bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 active:scale-95 transition-transform">
@@ -156,7 +156,7 @@ export default function Dashboard() {
           <span className="font-bold text-slate-700 text-xs sm:text-base">Laporan</span>
         </Link>
         <Link href="/categories" className="bg-white p-3 sm:p-6 rounded-xl sm:rounded-3xl shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center active:scale-95 transition-all">
-          <Settings className="w-6 h-6 sm:w-10 sm:h-10 text-orange-600 mb-1 sm:mb-2" />
+          <Layers className="w-6 h-6 sm:w-10 sm:h-10 text-orange-600 mb-1 sm:mb-2" />
           <span className="font-bold text-slate-700 text-xs sm:text-base">Kategori</span>
         </Link>
       </div>

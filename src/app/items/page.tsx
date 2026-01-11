@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Package, Pencil, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Plus, Package, Pencil, Trash2, X, Search } from 'lucide-react';
 import Link from 'next/link';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
@@ -29,6 +29,7 @@ export default function ItemsPage() {
     const [isAdding, setIsAdding] = useState(false);
     const [editingItem, setEditingItem] = useState<Item | null>(null);
     const [deleteTarget, setDeleteTarget] = useState<Item | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const [formData, setFormData] = useState({
         name: '',
@@ -182,6 +183,11 @@ export default function ItemsPage() {
         });
     };
 
+    const filteredItems = items.filter(item =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.code.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <main className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
             <header className="flex items-center justify-between gap-4">
@@ -199,6 +205,26 @@ export default function ItemsPage() {
                     <span className="hidden sm:inline">Tambah</span>
                 </button>
             </header>
+
+            {/* Search Bar */}
+            <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                <input
+                    type="text"
+                    placeholder="Cari nama atau kode barang..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full !p-4 !pl-12 !bg-white !rounded-2xl !border-slate-200 !shadow-sm !text-lg !font-medium focus:!border-blue-500 focus:!ring-4 focus:!ring-blue-100 transition-all"
+                />
+                {searchQuery && (
+                    <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-100 rounded-full"
+                    >
+                        <X className="w-4 h-4 text-slate-400" />
+                    </button>
+                )}
+            </div>
 
             {/* Add/Edit Form */}
             {(isAdding || editingItem) && (
@@ -277,9 +303,20 @@ export default function ItemsPage() {
                     <Package className="w-20 h-20 mx-auto mb-4 text-slate-200" />
                     <p className="text-xl font-bold text-slate-400 italic">Belum ada barang terdaftar.</p>
                 </div>
+            ) : filteredItems.length === 0 ? (
+                <div className="card text-center py-20 opacity-50 border-dashed">
+                    <Search className="w-20 h-20 mx-auto mb-4 text-slate-200" />
+                    <p className="text-xl font-bold text-slate-400 italic">Barang &quot;{searchQuery}&quot; tidak ditemukan.</p>
+                    <button
+                        onClick={() => setSearchQuery('')}
+                        className="mt-4 text-blue-500 font-bold hover:underline"
+                    >
+                        Hapus pencarian
+                    </button>
+                </div>
             ) : (
                 <div className="space-y-3">
-                    {items.map((item) => (
+                    {filteredItems.map((item) => (
                         <div key={item.id} className="card flex items-start sm:items-center gap-3 sm:gap-6 !p-3 sm:!p-6 group">
                             <div className="p-2 sm:p-4 bg-slate-100 rounded-lg sm:rounded-2xl shrink-0">
                                 <Package className="w-5 h-5 sm:w-10 sm:h-10 text-slate-400" />

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
-import { ArrowLeft, Plus, Package, Trash2, Pencil } from 'lucide-react';
+import { ArrowLeft, Plus, Package, Trash2, Pencil, Layers } from 'lucide-react';
 import Link from 'next/link';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
@@ -148,6 +148,9 @@ export default function CategoryDetailPage({ params }: { params: Promise<{ id: s
                 <Link href="/categories" className="p-2 sm:p-3 bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 active:scale-95 transition-transform">
                     <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                 </Link>
+                <div className="p-2 sm:p-3 bg-orange-100 rounded-xl sm:rounded-2xl">
+                    <Layers className="w-5 h-5 sm:w-8 sm:h-8 text-orange-600" />
+                </div>
                 <div>
                     <h1 className="text-xl sm:text-3xl font-bold">{category.name}</h1>
                     <p className="text-sm text-slate-500">{category.items.length} barang • Total: {category.totalStock} pcs</p>
