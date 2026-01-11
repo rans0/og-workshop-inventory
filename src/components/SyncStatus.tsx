@@ -1,43 +1,35 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
-import { Upload, Download, Wifi, WifiOff } from 'lucide-react';
+import { Upload, Download, Wifi, WifiOff, CheckCircle } from 'lucide-react';
 
 export default function SyncStatus() {
     const [isOnline, setIsOnline] = useState(true);
     const [syncing, setSyncing] = useState(false);
     const [pulling, setPulling] = useState(false);
     const [lastSync, setLastSync] = useState<Date | null>(null);
+    const [autoSyncMessage, setAutoSyncMessage] = useState<string | null>(null);
+    const wasOffline = useRef(false);
 
     const pendingTransactions = useLiveQuery(() =>
         db.transactions.where('syncStatus').equals('PENDING').count()
     );
 
-    useEffect(() => {
-        setIsOnline(navigator.onLine);
-        const handleOnline = () => setIsOnline(true);
-        const handleOffline = () => setIsOnline(false);
-
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
-
-        // Load last sync time from localStorage
-        const saved = localStorage.getItem('lastSyncTime');
-        if (saved) setLastSync(new Date(saved));
-
-        return () => {
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
-        };
-    }, []);
-
     // Push local data to cloud
-    const pushToCloud = async () => {
-        if (!isOnline || syncing) return;
+    const pushToCloud = useCallback(async (isAutoSync = false) => {
+        if (syncing) return;
+
+        // Check pendingTransactions from DB directly for auto-sync
+        const pendingCount = await db.transactions.where('syncStatus').equals('PENDING').count();
+        if (pendingCount === 0) return;
 
         setSyncing(true);
+        if (isAutoSync) {
+            setAutoSyncMessage('Auto-sync: Mengirim data...');
+        }
+
         try {
             const categories = await db.categories.toArray();
             const items = await db.items.toArray();
@@ -54,13 +46,55 @@ export default function SyncStatus() {
                 const now = new Date();
                 setLastSync(now);
                 localStorage.setItem('lastSyncTime', now.toISOString());
+
+                if (isAutoSync) {
+                    setAutoSyncMessage('✓ Auto-sync berhasil!');
+                    setTimeout(() => setAutoSyncMessage(null), 3000);
+                }
             }
         } catch (err) {
             console.error('Push sync failed:', err);
+            if (isAutoSync) {
+                setAutoSyncMessage('Auto-sync gagal, coba manual');
+                setTimeout(() => setAutoSyncMessage(null), 5000);
+            }
         } finally {
             setSyncing(false);
         }
-    };
+    }, [syncing]);
+
+    useEffect(() => {
+        setIsOnline(navigator.onLine);
+
+        const handleOnline = () => {
+            setIsOnline(true);
+            // Auto-sync when coming back online from offline
+            if (wasOffline.current) {
+                wasOffline.current = false;
+                // Small delay to ensure network is stable
+                setTimeout(() => {
+                    pushToCloud(true);
+                }, 1000);
+            }
+        };
+
+        const handleOffline = () => {
+            setIsOnline(false);
+            wasOffline.current = true;
+        };
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        // Load last sync time from localStorage
+        const saved = localStorage.getItem('lastSyncTime');
+        if (saved) setLastSync(new Date(saved));
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, [pushToCloud]);
 
     // Pull data from cloud to local
     const pullFromCloud = useCallback(async () => {
@@ -137,6 +171,14 @@ export default function SyncStatus() {
 
     return (
         <div className="space-y-3">
+            {/* Auto-sync Message */}
+            {autoSyncMessage && (
+                <div className="flex items-center gap-2 p-3 bg-blue-100 border-2 border-blue-200 rounded-2xl text-blue-700 font-bold animate-pulse">
+                    <CheckCircle className="w-5 h-5" />
+                    {autoSyncMessage}
+                </div>
+            )}
+
             {/* Online/Offline Status Bar */}
             <div className={`flex items-center justify-between p-3 rounded-2xl border-2 ${isOnline
                 ? 'bg-green-50 border-green-200 text-green-700'
@@ -173,7 +215,7 @@ export default function SyncStatus() {
 
                     {/* Push to Cloud */}
                     <button
-                        onClick={pushToCloud}
+                        onClick={() => pushToCloud(false)}
                         disabled={syncing || !pendingTransactions}
                         className={`flex items-center justify-center gap-2 p-4 rounded-2xl font-bold active:scale-95 transition-all disabled:opacity-50 ${pendingTransactions
                             ? 'bg-orange-50 border-2 border-orange-200 text-orange-700'
