@@ -188,14 +188,14 @@ export default function Dashboard() {
                   className="w-full p-3 sm:p-4 bg-slate-50 rounded-xl sm:rounded-2xl flex justify-between items-center border border-slate-100 active:bg-slate-100 transition-colors text-left"
                 >
                   <div className="min-w-0 flex-1 mr-3">
-                    <p className="font-bold text-sm sm:text-lg truncate">{tx.itemName || 'Barang Terhapus'}</p>
-                    <p className="text-slate-500 text-xs sm:text-sm">Stok: {item?.currentStock ?? 0}</p>
+                    <p className="font-bold text-base sm:text-xl truncate text-slate-900">{tx.itemName || 'Barang Terhapus'}</p>
+                    <p className="text-slate-600 font-bold text-xs sm:text-base">Stok: {item?.currentStock ?? 0}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className={`font-black text-lg sm:text-xl ${tx.type === 'IN' ? 'text-green-600' : 'text-red-600'}`}>
+                    <p className={`font-black text-xl sm:text-2xl ${tx.type === 'IN' ? 'text-green-600' : 'text-red-700'}`}>
                       {tx.type === 'IN' ? '+' : '-'}{tx.quantity}
                     </p>
-                    <p className="text-xs text-slate-400">{formatTimeAgo(tx.createdAt)}</p>
+                    <p className="text-xs sm:text-sm font-bold text-slate-500">{formatTimeAgo(tx.createdAt)}</p>
                   </div>
                 </button>
               );

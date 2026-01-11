@@ -150,7 +150,7 @@ export default function TransactionPage({ params }: { params: Promise<{ type: st
                 <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                     {/* Category Filter */}
                     <div className="card !p-4 sm:!p-6">
-                        <label className="!text-base sm:!text-lg">Filter Kategori</label>
+                        <label className="!text-lg sm:!text-xl font-black text-slate-500 uppercase tracking-wide mb-2 block">1. Filter Kategori</label>
                         <div className="relative">
                             <select
                                 value={selectedCategoryId}
@@ -158,7 +158,7 @@ export default function TransactionPage({ params }: { params: Promise<{ type: st
                                     setSelectedCategoryId(e.target.value);
                                     setSelectedItemId(''); // Reset item selection
                                 }}
-                                className="appearance-none pr-12 !p-3 sm:!p-5 !text-base sm:!text-xl"
+                                className="appearance-none pr-12 !p-4 sm:!p-5 !text-lg sm:!text-2xl font-bold bg-slate-50 border-2 border-slate-100 rounded-2xl"
                             >
                                 <option value="">-- Semua Kategori --</option>
                                 {categories.map(cat => (
@@ -171,28 +171,36 @@ export default function TransactionPage({ params }: { params: Promise<{ type: st
 
                     {/* Item Selection */}
                     <div className="card !p-4 sm:!p-6">
-                        <label className="!text-base sm:!text-lg">Pilih Barang</label>
+                        <label className="!text-lg sm:!text-xl font-black text-slate-500 uppercase tracking-wide mb-2 block">2. Pilih Barang</label>
                         <div className="relative">
                             <select
                                 value={selectedItemId}
                                 onChange={(e) => setSelectedItemId(e.target.value)}
-                                className="appearance-none pr-12 !p-3 sm:!p-5 !text-base sm:!text-xl"
+                                className="appearance-none pr-12 !p-4 sm:!p-5 !text-lg sm:!text-2xl font-bold bg-slate-50 border-2 border-slate-100 rounded-2xl"
                             >
                                 <option value="">-- Pilih dari Daftar --</option>
                                 {filteredItems.map(item => (
                                     <option key={item.id} value={item.id}>
-                                        {item.name} (Stok: {item.currentStock})
+                                        {item.name}
                                     </option>
                                 ))}
                             </select>
                             <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-6 h-6 sm:w-8 sm:h-8" />
                         </div>
                         {selectedItem && (
-                            <div className="mt-4 p-3 sm:p-4 bg-blue-50 rounded-xl sm:rounded-2xl flex items-center gap-3 sm:gap-4">
-                                <Package className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500" />
-                                <div>
-                                    <p className="font-bold text-blue-800">{selectedItem.name}</p>
-                                    <p className="text-xs sm:text-sm text-blue-600">Kode: {selectedItem.code}</p>
+                            <div className="mt-4 p-4 sm:p-6 bg-blue-50 border-2 border-blue-100 rounded-2xl flex items-center justify-between">
+                                <div className="flex items-center gap-3 sm:gap-4">
+                                    <Package className="w-8 h-8 sm:w-12 sm:h-12 text-blue-500" />
+                                    <div>
+                                        <p className="font-black text-lg sm:text-2xl text-blue-900">{selectedItem.name}</p>
+                                        <p className="text-xs sm:text-lg font-bold text-blue-600">Kode: {selectedItem.code}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right border-l-2 border-blue-200 pl-4 sm:pl-6">
+                                    <p className="text-[10px] sm:text-sm font-black text-blue-400 uppercase">Stok Saat Ini</p>
+                                    <p className={`text-2xl sm:text-5xl font-black leading-none ${selectedItem.currentStock < 5 ? 'text-red-600' : 'text-blue-700'}`}>
+                                        {selectedItem.currentStock}
+                                    </p>
                                 </div>
                             </div>
                         )}
@@ -200,25 +208,25 @@ export default function TransactionPage({ params }: { params: Promise<{ type: st
 
                     {/* Quantity */}
                     <div className="card text-center !p-4 sm:!p-6">
-                        <label className="text-center !text-base sm:!text-lg">Jumlah Barang</label>
-                        <div className="flex items-center justify-center gap-4 sm:gap-6 py-4">
+                        <label className="text-center !text-lg sm:!text-xl font-black text-slate-500 uppercase tracking-wide block">3. Jumlah Barang</label>
+                        <div className="flex items-center justify-center gap-6 sm:gap-10 py-6">
                             <button
                                 type="button"
                                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                className="w-14 h-14 sm:w-20 sm:h-20 bg-slate-100 rounded-full border-4 border-slate-200 text-3xl sm:text-4xl font-bold flex items-center justify-center active:bg-slate-200"
+                                className="w-16 h-16 sm:w-24 sm:h-24 bg-slate-100 rounded-full border-4 border-slate-200 text-3xl sm:text-5xl font-black flex items-center justify-center active:bg-slate-200 transition-colors shadow-sm"
                             >
                                 -
                             </button>
-                            <span className="text-4xl sm:text-6xl font-black min-w-[80px] sm:min-w-[120px]">{quantity}</span>
+                            <span className="text-5xl sm:text-8xl font-black min-w-[100px] sm:min-w-[150px] text-slate-900">{quantity}</span>
                             <button
                                 type="button"
                                 onClick={() => setQuantity(quantity + 1)}
-                                className="w-14 h-14 sm:w-20 sm:h-20 bg-slate-100 rounded-full border-4 border-slate-200 text-3xl sm:text-4xl font-bold flex items-center justify-center active:bg-slate-200"
+                                className="w-16 h-16 sm:w-24 sm:h-24 bg-slate-100 rounded-full border-4 border-slate-200 text-3xl sm:text-5xl font-black flex items-center justify-center active:bg-slate-200 transition-colors shadow-sm"
                             >
                                 +
                             </button>
                         </div>
-                        <p className="text-slate-400 font-bold uppercase tracking-wider text-sm">pcs</p>
+                        <p className="text-slate-500 font-bold uppercase tracking-widest text-base sm:text-lg">pcs</p>
                     </div>
 
                     {/* Notes */}

@@ -57,7 +57,7 @@ export default function HistoryPage() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 sm:w-6 sm:h-6" />
                 <input
                     placeholder="Cari barang atau catatan..."
-                    className="!pl-12 sm:!pl-14 !p-3 sm:!p-5"
+                    className="!pl-12 sm:!pl-16 !p-4 sm:!p-5 !text-lg sm:!text-2xl font-medium focus:!border-blue-500 focus:!ring-4 focus:!ring-blue-100 transition-all border-2 border-slate-100 shadow-sm"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -77,12 +77,12 @@ export default function HistoryPage() {
                                 <Package className="w-6 h-6 sm:w-8 sm:h-8" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                    <span className={`text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded uppercase ${tx.type === 'IN' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+                                <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                    <span className={`text-[10px] sm:text-sm font-black px-2.5 py-1 rounded uppercase tracking-wide ${tx.type === 'IN' ? 'bg-green-600 text-white' : 'bg-red-700 text-white'}`}>
                                         {tx.type === 'IN' ? 'Masuk' : 'Keluar'}
                                     </span>
-                                    <span className="text-[10px] sm:text-xs text-slate-400 flex items-center gap-1">
-                                        <Calendar className="w-3 h-3" />
+                                    <span className="text-xs sm:text-base text-slate-500 font-bold flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded-lg">
+                                        <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
                                         {new Date(tx.createdAt).toLocaleString('id-ID', {
                                             day: '2-digit',
                                             month: 'short',
@@ -91,14 +91,14 @@ export default function HistoryPage() {
                                         })}
                                     </span>
                                 </div>
-                                <h3 className="text-base sm:text-xl font-bold text-slate-800 truncate">{tx.itemName || 'Barang Terhapus'}</h3>
-                                {tx.notes && <p className="text-slate-500 italic text-xs sm:text-sm mt-1 truncate">&quot;{tx.notes}&quot;</p>}
+                                <h3 className="text-lg sm:text-2xl font-black text-slate-900 truncate">{tx.itemName || 'Barang Terhapus'}</h3>
+                                {tx.notes && <p className="text-slate-600 font-bold italic text-xs sm:text-lg mt-1 truncate">&quot;{tx.notes}&quot;</p>}
                             </div>
-                            <div className="text-right shrink-0">
-                                <p className={`text-xl sm:text-2xl font-black ${tx.type === 'IN' ? 'text-green-600' : 'text-red-600'}`}>
+                            <div className="text-right shrink-0 border-l-2 border-slate-50 pl-4 sm:pl-8">
+                                <p className={`text-2xl sm:text-4xl font-black leading-tight ${tx.type === 'IN' ? 'text-green-600' : 'text-red-700'}`}>
                                     {tx.type === 'IN' ? '+' : '-'}{tx.quantity}
                                 </p>
-                                <p className="text-[10px] sm:text-xs font-bold text-slate-400">pcs</p>
+                                <p className="text-xs sm:text-base font-black text-slate-400 uppercase tracking-widest mt-0.5">pcs</p>
                             </div>
                         </div>
                     ))}

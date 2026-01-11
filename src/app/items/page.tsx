@@ -322,29 +322,29 @@ export default function ItemsPage() {
                                 <Package className="w-5 h-5 sm:w-10 sm:h-10 text-slate-400" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap mb-1">
-                                    <span className="text-[8px] sm:text-xs font-bold bg-slate-200 px-1.5 py-0.5 rounded uppercase text-slate-600 font-mono">
+                                <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                                    <span className="text-[10px] sm:text-sm font-bold bg-slate-200 px-2 py-0.5 rounded uppercase text-slate-700 font-mono">
                                         {item.code}
                                     </span>
                                     {item.categoryName && (
-                                        <span className="text-[8px] sm:text-xs font-bold bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded uppercase truncate max-w-[100px] sm:max-w-none">
+                                        <span className="text-[10px] sm:text-sm font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded uppercase truncate max-w-[120px] sm:max-w-none">
                                             {item.categoryName}
                                         </span>
                                     )}
                                 </div>
-                                <h3 className="text-sm sm:text-2xl font-bold text-slate-800 truncate sm:whitespace-normal group-hover:text-blue-600 transition-colors">
+                                <h3 className="text-base sm:text-3xl font-black text-slate-900 truncate sm:whitespace-normal group-hover:text-blue-600 transition-colors mb-1">
                                     {item.name}
                                 </h3>
                                 {item.price > 0 && (
-                                    <p className="text-[10px] sm:text-sm text-slate-500 font-medium">
-                                        Harga: <span className="font-bold">{formatPrice(item.price)}</span>
+                                    <p className="text-xs sm:text-lg text-slate-600 font-bold">
+                                        Harga: <span className="text-blue-600">{formatPrice(item.price)}</span>
                                     </p>
                                 )}
                             </div>
                             <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-6 shrink-0">
                                 <div className="text-right">
-                                    <p className="text-[8px] sm:text-xs font-bold text-slate-400 uppercase tracking-tighter">STOK</p>
-                                    <p className={`text-xl sm:text-4xl font-black leading-none ${item.currentStock < 5 ? 'text-red-500' : 'text-slate-800'}`}>
+                                    <p className="text-[10px] sm:text-sm font-black text-slate-500 uppercase tracking-tighter">STOK</p>
+                                    <p className={`text-2xl sm:text-5xl font-black leading-none ${item.currentStock < 5 ? 'text-red-600' : 'text-slate-900'}`}>
                                         {item.currentStock}
                                     </p>
                                 </div>

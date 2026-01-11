@@ -171,21 +171,21 @@ export default function CategoriesPage() {
                                     </button>
                                 </div>
                             ) : (
-                                <Link href={`/categories/${cat.id}`} className="flex items-center gap-4">
-                                    <div className="p-3 bg-orange-50 rounded-xl shrink-0">
-                                        <Layers className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
+                                <Link href={`/categories/${cat.id}`} className="flex items-center gap-4 py-2">
+                                    <div className="p-4 bg-orange-50 rounded-2xl shrink-0">
+                                        <Layers className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="text-lg sm:text-xl font-bold text-slate-700 truncate">{cat.name}</h3>
-                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] sm:text-sm text-slate-500 mt-1 font-medium">
-                                            <div className="flex items-center gap-1">
-                                                <Package className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400" />
+                                        <h3 className="text-xl sm:text-3xl font-black text-slate-800 truncate">{cat.name}</h3>
+                                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-lg text-slate-600 mt-2 font-bold">
+                                            <div className="flex items-center gap-1.5">
+                                                <Package className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400" />
                                                 <span>{cat.itemCount} barang</span>
                                             </div>
                                             <span className="hidden sm:inline text-slate-300">•</span>
-                                            <div className="flex items-center gap-1">
-                                                <span className="text-slate-400 uppercase text-[8px] sm:text-[10px] font-bold">Total Stok:</span>
-                                                <span className="font-bold text-slate-700">{cat.totalStock} pcs</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-slate-500 uppercase text-[10px] sm:text-xs font-black tracking-widest">Total Stok:</span>
+                                                <span className="text-slate-900">{cat.totalStock} pcs</span>
                                             </div>
                                         </div>
                                     </div>

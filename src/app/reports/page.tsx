@@ -215,11 +215,11 @@ export default function ReportsPage() {
                                     <Package className="w-5 h-5 sm:w-6 sm:h-6" />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-[9px] sm:text-[10px] font-bold text-blue-800 uppercase tracking-tight opacity-70">Uang Modal (Belanja)</p>
-                                    <p className="text-xl sm:text-2xl font-black text-blue-600 leading-none">
+                                    <p className="text-[10px] sm:text-xs font-black text-blue-800 uppercase tracking-wide opacity-80 mb-0.5">Uang Modal (Belanja)</p>
+                                    <p className="text-2xl sm:text-4xl font-black text-blue-700 leading-none">
                                         {formatPrice(grandTotalInValue)}
                                     </p>
-                                    <p className="text-[10px] text-blue-700 font-bold truncate mt-1">+{grandTotalIn} pcs masuk</p>
+                                    <p className="text-xs sm:text-base text-blue-800 font-bold mt-1.5">+{grandTotalIn} pcs masuk</p>
                                 </div>
                             </div>
                         </div>
@@ -229,11 +229,11 @@ export default function ReportsPage() {
                                     <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6" />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-[9px] sm:text-[10px] font-bold text-orange-800 uppercase tracking-tight opacity-70">Uang Keluar (Pemakaian)</p>
-                                    <p className="text-xl sm:text-2xl font-black text-orange-600 leading-none">
+                                    <p className="text-[10px] sm:text-xs font-black text-orange-800 uppercase tracking-wide opacity-80 mb-0.5">Uang Keluar (Pemakaian)</p>
+                                    <p className="text-2xl sm:text-4xl font-black text-orange-700 leading-none">
                                         {formatPrice(grandTotalOutValue)}
                                     </p>
-                                    <p className="text-[10px] text-orange-700 font-bold truncate mt-1">-{grandTotalOut} pcs keluar</p>
+                                    <p className="text-xs sm:text-base text-orange-800 font-bold mt-1.5">-{grandTotalOut} pcs keluar</p>
                                 </div>
                             </div>
                         </div>
@@ -263,17 +263,17 @@ export default function ReportsPage() {
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
-                                            <div className="flex items-center gap-4 sm:gap-6">
+                                        <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                                            <div className="flex items-center gap-6 sm:gap-8">
                                                 <div className="flex flex-col items-start sm:items-end">
-                                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Uang Modal</span>
-                                                    <p className="font-bold text-sm text-blue-600">
+                                                    <span className="text-[10px] sm:text-xs text-slate-500 font-black uppercase tracking-tighter mb-0.5">Uang Modal</span>
+                                                    <p className="font-extrabold text-sm sm:text-lg text-blue-700">
                                                         {formatPrice(cat.totalInValue)}
                                                     </p>
                                                 </div>
                                                 <div className="flex flex-col items-start sm:items-end">
-                                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Uang Keluar</span>
-                                                    <p className="font-bold text-sm text-orange-600">
+                                                    <span className="text-[10px] sm:text-xs text-slate-500 font-black uppercase tracking-tighter mb-0.5">Uang Keluar</span>
+                                                    <p className="font-extrabold text-sm sm:text-lg text-orange-700">
                                                         {formatPrice(cat.totalOutValue)}
                                                     </p>
                                                 </div>
