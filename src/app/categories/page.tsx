@@ -21,7 +21,7 @@ export default function CategoriesPage() {
                 createdAt: new Date()
             });
             setNewName('');
-        } catch (err) {
+        } catch {
             alert('Nama kategori sudah ada!');
         }
     };

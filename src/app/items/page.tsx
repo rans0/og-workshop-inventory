@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
-import { ArrowLeft, Plus, Package, Search } from 'lucide-react';
+import { ArrowLeft, Plus, Package } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ItemsPage() {
@@ -59,7 +59,7 @@ export default function ItemsPage() {
 
             setFormData({ name: '', categoryId: '', initialStock: '0' });
             setIsAdding(false);
-        } catch (err) {
+        } catch {
             alert('Nama barang sudah ada!');
         }
     };

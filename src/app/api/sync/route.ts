@@ -9,8 +9,8 @@ export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
     try {
-        const data = await req.json();
-        const { categories, items, transactions } = data;
+        await req.json();
+        // const { categories, items, transactions } = data;
 
         // TODO: Perform bulk upsert to D1 database
         // This part requires environment-specific D1 binding

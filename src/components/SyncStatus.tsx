@@ -3,12 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
-import { CloudOff, CloudSync, CheckCircle2, AlertCircle } from 'lucide-react';
+import { CloudOff, CloudSync, CheckCircle2 } from 'lucide-react';
 
 export default function SyncStatus() {
     const [isOnline, setIsOnline] = useState(true);
     const [syncing, setSyncing] = useState(false);
-    const [lastSync, setLastSync] = useState<Date | null>(null);
 
     const pendingTransactions = useLiveQuery(() =>
         db.transactions.where('syncStatus').equals('PENDING').count()
@@ -46,7 +45,6 @@ export default function SyncStatus() {
             if (res.ok) {
                 // Mark all as synced for now in this simple implementation
                 await db.transactions.where('syncStatus').equals('PENDING').modify({ syncStatus: 'SYNCED' });
-                setLastSync(new Date());
             }
         } catch (err) {
             console.error('Manual sync failed:', err);
@@ -71,8 +69,8 @@ export default function SyncStatus() {
             onClick={triggerSync}
             disabled={syncing || !pendingTransactions}
             className={`w-full p-4 rounded-2xl border-2 transition-all flex items-center justify-between ${pendingTransactions
-                    ? 'bg-blue-50 border-blue-200 text-blue-700'
-                    : 'bg-green-50 border-green-200 text-green-700 opacity-60'
+                ? 'bg-blue-50 border-blue-200 text-blue-700'
+                : 'bg-green-50 border-green-200 text-green-700 opacity-60'
                 }`}
         >
             <div className="flex items-center gap-3">

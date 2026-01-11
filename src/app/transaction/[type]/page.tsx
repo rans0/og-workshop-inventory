@@ -63,7 +63,7 @@ export default function TransactionPage() {
             setTimeout(() => {
                 router.push('/');
             }, 1500);
-        } catch (err) {
+        } catch {
             alert('Gagal mencatat transaksi!');
         }
     };

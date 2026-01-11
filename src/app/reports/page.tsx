@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
-import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Package, ChevronRight } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Package } from 'lucide-react';
 import Link from 'next/link';
 
 type ReportTab = 'daily' | 'monthly' | 'yearly';

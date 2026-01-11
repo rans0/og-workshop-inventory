@@ -59,7 +59,7 @@ export default function HistoryPage() {
                                     </span>
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-800">{item?.name || 'Barang Terhapus'}</h3>
-                                {tx.notes && <p className="text-slate-500 italic text-sm mt-1">"{tx.notes}"</p>}
+                                {tx.notes && <p className="text-slate-500 italic text-sm mt-1">&quot;{tx.notes}&quot;</p>}
                             </div>
                             <div className="text-right">
                                 <p className={`text-2xl font-black ${tx.type === 'IN' ? 'text-green-600' : 'text-red-600'}`}>
