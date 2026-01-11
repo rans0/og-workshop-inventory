@@ -40,7 +40,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
                     <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-600 rounded-2xl sm:rounded-3xl mx-auto flex items-center justify-center shadow-lg shadow-blue-200">
                         <Lock className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 pt-3 sm:pt-4">OLD SCHOOL</h1>
+                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 pt-3 sm:pt-4">RATU MOTOR</h1>
                     <p className="text-slate-500 font-bold uppercase tracking-widest text-xs sm:text-sm">Akses Terbatas</p>
                 </div>
 
