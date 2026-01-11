@@ -1,175 +1,336 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/lib/db';
-import { ArrowLeft, Plus, Package } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Plus, Package, Pencil, Trash2, X } from 'lucide-react';
 import Link from 'next/link';
+import ConfirmDialog from '@/components/ConfirmDialog';
+
+interface Category {
+    id: string;
+    name: string;
+}
+
+interface Item {
+    id: string;
+    code: string;
+    name: string;
+    categoryId: string;
+    categoryName: string;
+    currentStock: number;
+    unit: string;
+    price: number;
+}
 
 export default function ItemsPage() {
-    const items = useLiveQuery(() => db.items.toArray());
-    const categories = useLiveQuery(() => db.categories.toArray());
+    const [items, setItems] = useState<Item[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const [isAdding, setIsAdding] = useState(false);
+    const [editingItem, setEditingItem] = useState<Item | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<Item | null>(null);
+
     const [formData, setFormData] = useState({
         name: '',
         categoryId: '',
+        price: '',
         initialStock: '0'
     });
 
-    const generateCode = async () => {
-        const allItems = await db.items.toArray();
-        const count = allItems.length + 1;
-        return `WS-${count.toString().padStart(4, '0')}`;
+    const fetchData = async () => {
+        try {
+            const [itemsRes, catsRes] = await Promise.all([
+                fetch('/api/items'),
+                fetch('/api/categories')
+            ]);
+
+            if (itemsRes.ok && catsRes.ok) {
+                setItems(await itemsRes.json());
+                setCategories(await catsRes.json());
+            }
+        } catch (err) {
+            console.error('Failed to fetch data:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const formatPrice = (price: number) => {
+        if (price === 0) return '';
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(price);
     };
 
     const addItem = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.name.trim() || !formData.categoryId) {
+        const trimmed = formData.name.trim();
+        if (!trimmed || !formData.categoryId) {
             alert('Mohon isi nama dan pilih kategori!');
+            return;
+        }
+        if (trimmed.length < 3) {
+            alert('Nama barang minimal 3 karakter');
             return;
         }
 
         try {
-            const code = await generateCode();
-            const id = crypto.randomUUID();
-
-            await db.items.add({
-                id,
-                code,
-                name: formData.name.trim(),
-                categoryId: formData.categoryId,
-                currentStock: parseInt(formData.initialStock) || 0,
-                unit: 'pcs',
-                lastUpdatedAt: new Date()
+            const res = await fetch('/api/items', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: trimmed,
+                    categoryId: formData.categoryId,
+                    price: parseInt(formData.price) || 0
+                })
             });
 
-            // Also record initial transaction if stock > 0
-            if (parseInt(formData.initialStock) > 0) {
-                await db.transactions.add({
-                    id: crypto.randomUUID(),
-                    itemId: id,
-                    type: 'IN',
-                    quantity: parseInt(formData.initialStock),
-                    notes: 'Stok awal',
-                    createdAt: new Date(),
-                    syncStatus: 'PENDING'
-                });
-            }
+            if (res.ok) {
+                const newItem = await res.json();
 
-            setFormData({ name: '', categoryId: '', initialStock: '0' });
-            setIsAdding(false);
+                // Record initial stock if > 0
+                const initialStock = parseInt(formData.initialStock);
+                if (initialStock > 0) {
+                    await fetch('/api/transactions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            itemId: newItem.id,
+                            type: 'IN',
+                            quantity: initialStock,
+                            notes: 'Stok awal'
+                        })
+                    });
+                }
+
+                setFormData({ name: '', categoryId: '', price: '', initialStock: '0' });
+                setIsAdding(false);
+                fetchData();
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Gagal menambah barang!');
+            }
         } catch {
-            alert('Nama barang sudah ada!');
+            alert('Gagal menambah barang!');
         }
     };
 
+    const updateItem = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const trimmed = formData.name.trim();
+        if (!editingItem || !trimmed || !formData.categoryId) return;
+
+        if (trimmed.length < 3) {
+            alert('Nama barang minimal 3 karakter');
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/items/${editingItem.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: trimmed,
+                    categoryId: formData.categoryId,
+                    price: parseInt(formData.price) || 0
+                })
+            });
+
+            if (res.ok) {
+                setEditingItem(null);
+                setFormData({ name: '', categoryId: '', price: '', initialStock: '0' });
+                fetchData();
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Gagal update barang!');
+            }
+        } catch {
+            alert('Gagal update barang!');
+        }
+    };
+
+    const deleteItem = async () => {
+        if (!deleteTarget) return;
+
+        try {
+            const res = await fetch(`/api/items/${deleteTarget.id}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                setDeleteTarget(null);
+                fetchData();
+            }
+        } catch {
+            alert('Gagal menghapus barang!');
+        }
+    };
+
+    const startEdit = (item: Item) => {
+        setEditingItem(item);
+        setFormData({
+            name: item.name,
+            categoryId: item.categoryId,
+            price: item.price.toString(),
+            initialStock: '0'
+        });
+    };
+
     return (
-        <main className="max-w-4xl mx-auto p-6 space-y-8">
+        <main className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
             <header className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <Link href="/" className="p-3 bg-white rounded-2xl shadow-sm border border-slate-200">
-                        <ArrowLeft className="w-6 h-6" />
+                <div className="flex items-center gap-3 sm:gap-4">
+                    <Link href="/" className="p-2 sm:p-3 bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 active:scale-95 transition-transform">
+                        <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                     </Link>
-                    <h1 className="text-3xl font-bold">Daftar Barang</h1>
+                    <h1 className="text-xl sm:text-3xl font-bold">Daftar Barang</h1>
                 </div>
                 <button
                     onClick={() => setIsAdding(!isAdding)}
-                    className="btn-success p-4 flex items-center gap-2 rounded-2xl font-bold"
+                    className="p-3 sm:p-4 bg-green-600 text-white flex items-center gap-2 rounded-xl sm:rounded-2xl font-bold active:scale-95 transition-all"
                 >
-                    <Plus className="w-6 h-6" />
-                    Tambah Barang
+                    <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <span className="hidden sm:inline">Tambah</span>
                 </button>
             </header>
 
-            {isAdding && (
-                <form onSubmit={addItem} className="card space-y-6 border-blue-200 bg-blue-50/50">
-                    <h2 className="text-xl font-bold text-blue-800">Barang Baru</h2>
-                    <div className="space-y-4">
+            {/* Add/Edit Form */}
+            {(isAdding || editingItem) && (
+                <form onSubmit={editingItem ? updateItem : addItem} className="card space-y-4 border-blue-200 bg-blue-50/50 !p-4 sm:!p-6">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-lg sm:text-xl font-bold text-blue-800">
+                            {editingItem ? 'Edit Barang' : 'Barang Baru'}
+                        </h2>
+                        <button
+                            type="button"
+                            onClick={() => { setIsAdding(false); setEditingItem(null); }}
+                            className="p-2 hover:bg-blue-100 rounded-full"
+                        >
+                            <X className="w-5 h-5 text-blue-600" />
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label>Nama Barang</label>
+                            <label className="!text-sm">Nama Barang</label>
                             <input
                                 placeholder="Misal: Baut M6 10mm"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                className="!p-3"
                             />
                         </div>
                         <div>
-                            <label>Kategori</label>
+                            <label className="!text-sm">Kategori</label>
                             <select
                                 value={formData.categoryId}
                                 onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                                className="!p-3"
                             >
                                 <option value="">Pilih Kategori...</option>
-                                {categories?.map(c => (
+                                {categories.map(c => (
                                     <option key={c.id} value={c.id}>{c.name}</option>
                                 ))}
                             </select>
                         </div>
                         <div>
-                            <label>Stok Awal</label>
+                            <label className="!text-sm">Harga (Rp)</label>
                             <input
                                 type="number"
-                                value={formData.initialStock}
-                                onChange={(e) => setFormData({ ...formData, initialStock: e.target.value })}
+                                placeholder="50000"
+                                value={formData.price}
+                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                className="!p-3"
                             />
                         </div>
-                        <div className="flex gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setIsAdding(false)}
-                                className="flex-1 p-5 bg-white border-2 border-slate-200 rounded-2xl font-bold text-slate-500"
-                            >
-                                Batal
-                            </button>
-                            <button
-                                type="submit"
-                                className="flex-1 p-5 bg-blue-600 text-white rounded-2xl font-bold shadow-lg"
-                            >
-                                Simpan Barang
-                            </button>
-                        </div>
+                        {!editingItem && (
+                            <div>
+                                <label className="!text-sm">Stok Awal</label>
+                                <input
+                                    type="number"
+                                    value={formData.initialStock}
+                                    onChange={(e) => setFormData({ ...formData, initialStock: e.target.value })}
+                                    className="!p-3"
+                                />
+                            </div>
+                        )}
                     </div>
+                    <button
+                        type="submit"
+                        className="w-full p-4 bg-blue-600 text-white rounded-xl font-bold active:scale-95 transition-all"
+                    >
+                        {editingItem ? 'Simpan Perubahan' : 'Tambah Barang'}
+                    </button>
                 </form>
             )}
 
             {/* Item List */}
-            <div className="space-y-4">
-                {items?.map((item) => {
-                    const cat = categories?.find(c => c.id === item.categoryId);
-                    return (
-                        <div key={item.id} className="card flex items-center gap-6">
-                            <div className="p-4 bg-slate-100 rounded-2xl">
-                                <Package className="w-10 h-10 text-slate-400" />
+            {loading ? (
+                <p className="text-center text-slate-400 py-20">Memuat...</p>
+            ) : items.length === 0 && !isAdding ? (
+                <div className="card text-center py-20 opacity-50">
+                    <Package className="w-20 h-20 mx-auto mb-4 text-slate-200" />
+                    <p className="text-xl font-bold text-slate-400 italic">Belum ada barang terdaftar.</p>
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {items.map((item) => (
+                        <div key={item.id} className="card flex items-center gap-3 sm:gap-6 !p-4 sm:!p-6">
+                            <div className="p-3 sm:p-4 bg-slate-100 rounded-xl sm:rounded-2xl shrink-0">
+                                <Package className="w-6 h-6 sm:w-10 sm:h-10 text-slate-400" />
                             </div>
-                            <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs font-bold bg-slate-200 px-2 py-0.5 rounded uppercase text-slate-600">
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-[10px] sm:text-xs font-bold bg-slate-200 px-2 py-0.5 rounded uppercase text-slate-600">
                                         {item.code}
                                     </span>
-                                    <span className="text-xs font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded">
-                                        {cat?.name || 'No Category'}
+                                    <span className="text-[10px] sm:text-xs font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded">
+                                        {item.categoryName || 'No Category'}
                                     </span>
                                 </div>
-                                <h3 className="text-2xl font-bold text-slate-800">{item.name}</h3>
+                                <h3 className="text-lg sm:text-2xl font-bold text-slate-800 truncate">{item.name}</h3>
+                                {item.price > 0 && (
+                                    <p className="text-xs sm:text-sm text-slate-500">{formatPrice(item.price)}</p>
+                                )}
                             </div>
-                            <div className="text-right">
-                                <p className="text-sm font-bold text-slate-400">STOK SAAT INI</p>
-                                <p className={`text-4xl font-black ${item.currentStock < 5 ? 'text-red-600' : 'text-slate-800'}`}>
+                            <div className="text-right shrink-0">
+                                <p className="text-[10px] sm:text-xs font-bold text-slate-400">STOK</p>
+                                <p className={`text-2xl sm:text-4xl font-black ${item.currentStock < 5 ? 'text-red-600' : 'text-slate-800'}`}>
                                     {item.currentStock}
                                 </p>
-                                <p className="text-xs font-bold text-slate-400">pcs</p>
+                            </div>
+                            <div className="flex flex-col gap-1 shrink-0">
+                                <button
+                                    onClick={() => startEdit(item)}
+                                    className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
+                                >
+                                    <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
+                                </button>
+                                <button
+                                    onClick={() => setDeleteTarget(item)}
+                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                                >
+                                    <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                                </button>
                             </div>
                         </div>
-                    );
-                })}
-                {items?.length === 0 && !isAdding && (
-                    <div className="card text-center py-20 opacity-50">
-                        <Package className="w-20 h-20 mx-auto mb-4 text-slate-200" />
-                        <p className="text-xl font-bold text-slate-400 italic">Belum ada barang terdaftar.</p>
-                    </div>
-                )}
-            </div>
+                    ))}
+                </div>
+            )}
+
+            <ConfirmDialog
+                open={!!deleteTarget}
+                title="Hapus Barang?"
+                message={`Barang "${deleteTarget?.name}" akan dihapus. Histori transaksi tetap disimpan.`}
+                confirmText="Hapus"
+                onConfirm={deleteItem}
+                onCancel={() => setDeleteTarget(null)}
+            />
         </main>
     );
 }
