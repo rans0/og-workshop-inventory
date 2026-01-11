@@ -2,6 +2,7 @@
 wrangler.toml
 .dev.vars
 .wrangler
+.open-next
 
 # dependencies
 /node_modules
