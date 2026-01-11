@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
-import { CloudOff, CloudSync, CheckCircle2 } from 'lucide-react';
+import { Upload, Download, Wifi, WifiOff } from 'lucide-react';
 
 export default function SyncStatus() {
     const [isOnline, setIsOnline] = useState(true);
     const [syncing, setSyncing] = useState(false);
+    const [pulling, setPulling] = useState(false);
+    const [lastSync, setLastSync] = useState<Date | null>(null);
 
     const pendingTransactions = useLiveQuery(() =>
         db.transactions.where('syncStatus').equals('PENDING').count()
@@ -21,14 +23,19 @@ export default function SyncStatus() {
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
+        // Load last sync time from localStorage
+        const saved = localStorage.getItem('lastSyncTime');
+        if (saved) setLastSync(new Date(saved));
+
         return () => {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
     }, []);
 
-    const triggerSync = async () => {
-        if (!isOnline || syncing || !pendingTransactions) return;
+    // Push local data to cloud
+    const pushToCloud = async () => {
+        if (!isOnline || syncing) return;
 
         setSyncing(true);
         try {
@@ -43,45 +50,141 @@ export default function SyncStatus() {
             });
 
             if (res.ok) {
-                // Mark all as synced for now in this simple implementation
                 await db.transactions.where('syncStatus').equals('PENDING').modify({ syncStatus: 'SYNCED' });
+                const now = new Date();
+                setLastSync(now);
+                localStorage.setItem('lastSyncTime', now.toISOString());
             }
         } catch (err) {
-            console.error('Manual sync failed:', err);
+            console.error('Push sync failed:', err);
         } finally {
             setSyncing(false);
         }
     };
 
-    if (!isOnline) {
-        return (
-            <div className="bg-orange-50 text-orange-700 p-4 rounded-2xl border-2 border-orange-200 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <CloudOff className="w-6 h-6" />
-                    <span className="font-bold">Mode Offline (Bisa Tetap Input)</span>
-                </div>
-            </div>
-        );
-    }
+    // Pull data from cloud to local
+    const pullFromCloud = useCallback(async () => {
+        if (!isOnline || pulling) return;
+
+        setPulling(true);
+        try {
+            // Fetch all data from cloud
+            const [categoriesRes, itemsRes, transactionsRes] = await Promise.all([
+                fetch('/api/categories'),
+                fetch('/api/items'),
+                fetch('/api/transactions')
+            ]);
+
+            if (categoriesRes.ok && itemsRes.ok && transactionsRes.ok) {
+                const categories = await categoriesRes.json();
+                const items = await itemsRes.json();
+                const transactions = await transactionsRes.json();
+
+                // Clear and replace local data
+                await db.categories.clear();
+                await db.items.clear();
+                // Don't clear transactions with PENDING status
+                await db.transactions.where('syncStatus').equals('SYNCED').delete();
+
+                // Insert cloud data with transformed dates
+                if (categories.length > 0) {
+                    const cats = categories.map((c: Record<string, unknown>) => ({
+                        ...c,
+                        createdAt: c.createdAt ? new Date(c.createdAt as string) : new Date()
+                    }));
+                    await db.categories.bulkPut(cats);
+                }
+
+                if (items.length > 0) {
+                    const itms = items.map((i: Record<string, unknown>) => ({
+                        ...i,
+                        lastUpdatedAt: i.lastUpdatedAt ? new Date(i.lastUpdatedAt as string) : new Date()
+                    }));
+                    await db.items.bulkPut(itms);
+                }
+
+                if (transactions.length > 0) {
+                    const txs = transactions.map((t: Record<string, unknown>) => ({
+                        ...t,
+                        createdAt: t.createdAt ? new Date(t.createdAt as string) : new Date(),
+                        syncStatus: 'SYNCED'
+                    }));
+                    await db.transactions.bulkPut(txs);
+                }
+
+                const now = new Date();
+                setLastSync(now);
+                localStorage.setItem('lastSyncTime', now.toISOString());
+            }
+        } catch (err) {
+            console.error('Pull sync failed:', err);
+        } finally {
+            setPulling(false);
+        }
+    }, [isOnline, pulling]);
+
+    const formatLastSync = () => {
+        if (!lastSync) return 'Belum pernah';
+        const now = new Date();
+        const diff = now.getTime() - lastSync.getTime();
+        const minutes = Math.floor(diff / 60000);
+        if (minutes < 1) return 'Baru saja';
+        if (minutes < 60) return `${minutes} menit lalu`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours} jam lalu`;
+        return lastSync.toLocaleDateString();
+    };
 
     return (
-        <button
-            onClick={triggerSync}
-            disabled={syncing || !pendingTransactions}
-            className={`w-full p-4 rounded-2xl border-2 transition-all flex items-center justify-between ${pendingTransactions
-                ? 'bg-blue-50 border-blue-200 text-blue-700'
-                : 'bg-green-50 border-green-200 text-green-700 opacity-60'
-                }`}
-        >
-            <div className="flex items-center gap-3">
-                {pendingTransactions ? <CloudSync className={syncing ? 'animate-spin' : ''} /> : <CheckCircle2 />}
-                <span className="font-bold">
-                    {syncing ? 'Sedang Sinkronisasi...' :
-                        pendingTransactions ? `Ada ${pendingTransactions} data belum terkirim` :
-                            'Semua Data Aman di Cloud'}
-                </span>
+        <div className="space-y-3">
+            {/* Online/Offline Status Bar */}
+            <div className={`flex items-center justify-between p-3 rounded-2xl border-2 ${isOnline
+                ? 'bg-green-50 border-green-200 text-green-700'
+                : 'bg-red-50 border-red-200 text-red-700'
+                }`}>
+                <div className="flex items-center gap-2">
+                    {isOnline ? (
+                        <>
+                            <Wifi className="w-5 h-5" />
+                            <span className="font-bold">Online</span>
+                        </>
+                    ) : (
+                        <>
+                            <WifiOff className="w-5 h-5" />
+                            <span className="font-bold">Offline — Data disimpan lokal</span>
+                        </>
+                    )}
+                </div>
+                <span className="text-sm opacity-70">Sync: {formatLastSync()}</span>
             </div>
-            {pendingTransactions && !syncing && <span className="text-sm font-black underline">KIRIM SEKARANG</span>}
-        </button>
+
+            {/* Sync Actions */}
+            {isOnline && (
+                <div className="grid grid-cols-2 gap-3">
+                    {/* Pull from Cloud */}
+                    <button
+                        onClick={pullFromCloud}
+                        disabled={pulling}
+                        className="flex items-center justify-center gap-2 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl text-blue-700 font-bold active:scale-95 transition-all disabled:opacity-50"
+                    >
+                        <Download className={`w-5 h-5 ${pulling ? 'animate-bounce' : ''}`} />
+                        {pulling ? 'Mengambil...' : 'Ambil dari Cloud'}
+                    </button>
+
+                    {/* Push to Cloud */}
+                    <button
+                        onClick={pushToCloud}
+                        disabled={syncing || !pendingTransactions}
+                        className={`flex items-center justify-center gap-2 p-4 rounded-2xl font-bold active:scale-95 transition-all disabled:opacity-50 ${pendingTransactions
+                            ? 'bg-orange-50 border-2 border-orange-200 text-orange-700'
+                            : 'bg-gray-50 border-2 border-gray-200 text-gray-500'
+                            }`}
+                    >
+                        <Upload className={`w-5 h-5 ${syncing ? 'animate-bounce' : ''}`} />
+                        {syncing ? 'Mengirim...' : pendingTransactions ? `Kirim (${pendingTransactions})` : 'Semua Terkirim'}
+                    </button>
+                </div>
+            )}
+        </div>
     );
 }
