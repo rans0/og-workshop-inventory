@@ -27,7 +27,7 @@ jobs:
           cat <<EOF > wrangler.toml
           name = "workshop-inventory"
           compatibility_date = "2025-01-01"
-          pages_build_output_dir = ".next"
+          pages_build_output_dir = ".vercel/output/static"
 
           [[d1_databases]]
           binding = "DB"
@@ -35,12 +35,17 @@ jobs:
           database_id = "${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}"
           EOF
 
-      - name: Build and Deploy
+      - name: Build
+        run: |
+          npm run build
+          npm run pages:build
+        env:
+          NEXT_PUBLIC_APP_USERNAME: ${{ secrets.NEXT_PUBLIC_APP_USERNAME }}
+          NEXT_PUBLIC_APP_PIN: ${{ secrets.NEXT_PUBLIC_APP_PIN }}
+
+      - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy . --project-name=workshop-inventory
-          vars: |
-            NEXT_PUBLIC_APP_USERNAME=${{ secrets.NEXT_PUBLIC_APP_USERNAME }}
-            NEXT_PUBLIC_APP_PIN=${{ secrets.NEXT_PUBLIC_APP_PIN }}
+          command: pages deploy .vercel/output/static --project-name=workshop-inventory
