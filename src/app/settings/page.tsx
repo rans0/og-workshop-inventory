@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowLeft, Info, Database, Wifi, LogOut, ChevronRight, User, ShieldCheck, History as HistoryIcon, BookOpen } from 'lucide-react';
+import { ArrowLeft, Info, Database, Wifi, LogOut, ChevronRight, User, ShieldCheck, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SettingsPage() {

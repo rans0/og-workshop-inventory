@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Package, Pencil, Trash2, X, Search } from 'lucide-react';
+import { ArrowLeft, Plus, Package, Pencil, X, Search } from 'lucide-react';
 import Link from 'next/link';
-import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface Category {
     id: string;

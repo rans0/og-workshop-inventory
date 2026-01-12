@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowLeft, BookOpen, PlusCircle, MinusCircle, RefreshCw, BarChart3, Trash2, History, Info } from 'lucide-react';
+import { ArrowLeft, BookOpen, PlusCircle, MinusCircle, RefreshCw, BarChart3, Trash2, Info } from 'lucide-react';
 import Link from 'next/link';
 
 const SopSection = ({ icon, title, children }: { icon: React.ReactNode, title: string, children: React.ReactNode }) => (
@@ -58,7 +58,7 @@ export default function TutorialPage() {
                     <li>Klik tombol <span className="text-red-700 font-bold">KELUAR</span> di dashboard.</li>
                     <li>Pilih barang yang digunakan.</li>
                     <li>Masukkan jumlah pengeluaran.</li>
-                    <li>Opsional: Tambahkan **Catatan** (misal: "Servis Vario Putih").</li>
+                    <li>Opsional: Tambahkan **Catatan** (misal: &quot;Servis Vario Putih&quot;).</li>
                     <li>Klik Simpan. Sistem akan otomatis memotong stok.</li>
                 </ol>
             </SopSection>

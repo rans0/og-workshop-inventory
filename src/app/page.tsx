@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, MinusCircle, Package, History as HistoryIcon, Settings, ArrowRight, TrendingUp, X, Layers } from 'lucide-react';
+import { PlusCircle, MinusCircle, Package, History as HistoryIcon, Settings, ArrowRight, TrendingUp, Layers } from 'lucide-react';
 import Link from 'next/link';
 import QuickActionModal, { Item } from '@/components/QuickActionModal';
 

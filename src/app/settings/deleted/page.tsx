@@ -21,11 +21,9 @@ interface DeletedCategory {
 export default function DeletedDataManager() {
     const [items, setItems] = useState<DeletedItem[]>([]);
     const [categories, setCategories] = useState<DeletedCategory[]>([]);
-    const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
 
     const fetchData = async () => {
-        setLoading(true);
         try {
             const [itemsRes, catsRes] = await Promise.all([
                 fetch('/api/items?includeDeleted=true'),
@@ -34,13 +32,11 @@ export default function DeletedDataManager() {
             if (itemsRes.ok && catsRes.ok) {
                 const itemsData = await itemsRes.json();
                 const catsData = await catsRes.json();
-                setItems(itemsData.filter((i: any) => i.isDeleted === 1));
-                setCategories(catsData.filter((c: any) => c.isDeleted === 1));
+                setItems(itemsData.filter((i: DeletedItem) => i.isDeleted === 1));
+                setCategories(catsData.filter((c: DeletedCategory) => c.isDeleted === 1));
             }
         } catch (err) {
             console.error(err);
-        } finally {
-            setLoading(false);
         }
     };
 

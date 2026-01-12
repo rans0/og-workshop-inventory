@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, TrendingUp, TrendingDown, ChevronDown, ChevronUp, Package, RefreshCw } from 'lucide-react';
+import { ArrowLeft, TrendingDown, ChevronDown, ChevronUp, Package, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 
 type ReportTab = 'daily' | 'weekly' | 'monthly' | 'yearly' | 'all';
