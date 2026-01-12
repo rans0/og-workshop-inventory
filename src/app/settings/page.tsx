@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowLeft, Info, Database, Wifi, LogOut, ChevronRight, User, ShieldCheck, History as HistoryIcon } from 'lucide-react';
+import { ArrowLeft, Info, Database, Wifi, LogOut, ChevronRight, User, ShieldCheck, History as HistoryIcon, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SettingsPage() {
@@ -97,6 +97,15 @@ export default function SettingsPage() {
             <section className="space-y-3">
                 <h2 className="text-xs sm:text-sm font-black text-slate-400 uppercase tracking-widest ml-1">Tentang</h2>
                 <div className="card !p-2">
+                    <Link href="/settings/tutorial" className="flex items-center justify-between p-3 sm:p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors group">
+                        <div className="flex items-center gap-3">
+                            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-100">
+                                <BookOpen className="w-4 h-4" />
+                            </div>
+                            <span className="text-sm sm:text-base font-bold text-slate-700">Tutorial & SOP</span>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-500" />
+                    </Link>
                     {[
                         { label: 'Nama Bisnis', value: APP_NAME, icon: <ShieldCheck className="w-4 h-4 text-blue-500" /> },
                         { label: 'Versi Aplikasi', value: APP_VERSION, icon: <Info className="w-4 h-4 text-slate-400" /> },

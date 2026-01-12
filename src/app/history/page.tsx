@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Search, Calendar, Package } from 'lucide-react';
 import Link from 'next/link';
+import QuickActionModal, { Item } from '@/components/QuickActionModal';
 
 interface Transaction {
     id: string;
     itemId: string;
     itemName: string;
     itemCode: string;
+    itemStock: number;
     type: 'IN' | 'OUT';
     quantity: number;
     notes: string;
@@ -19,22 +21,24 @@ export default function HistoryPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+
+    const fetchTransactions = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/transactions?limit=200');
+            if (res.ok) {
+                const data = await res.json();
+                setTransactions(data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch transactions:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchTransactions = async () => {
-            try {
-                const res = await fetch('/api/transactions?limit=200');
-                if (res.ok) {
-                    const data = await res.json();
-                    setTransactions(data);
-                }
-            } catch (err) {
-                console.error('Failed to fetch transactions:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchTransactions();
     }, []);
 
@@ -72,7 +76,16 @@ export default function HistoryPage() {
             ) : (
                 <div className="space-y-3">
                     {filteredTransactions.map((tx) => (
-                        <div key={tx.id} className="card flex items-center gap-3 sm:gap-6 !p-4 sm:!p-6">
+                        <button
+                            key={tx.id}
+                            onClick={() => setSelectedItem({
+                                id: tx.itemId,
+                                name: tx.itemName,
+                                code: tx.itemCode,
+                                currentStock: tx.itemStock
+                            })}
+                            className="w-full card flex items-center gap-3 sm:gap-6 !p-4 sm:!p-6 text-left active:bg-slate-50 transition-colors"
+                        >
                             <div className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl ${tx.type === 'IN' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                                 <Package className="w-6 h-6 sm:w-8 sm:h-8" />
                             </div>
@@ -100,9 +113,17 @@ export default function HistoryPage() {
                                 </p>
                                 <p className="text-xs sm:text-base font-black text-slate-400 uppercase tracking-widest mt-0.5">pcs</p>
                             </div>
-                        </div>
+                        </button>
                     ))}
                 </div>
+            )}
+
+            {selectedItem && (
+                <QuickActionModal
+                    item={selectedItem}
+                    onRefresh={fetchTransactions}
+                    onClose={() => setSelectedItem(null)}
+                />
             )}
         </main>
     );

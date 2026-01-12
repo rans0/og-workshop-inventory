@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 
         const result = await db.prepare(`
             SELECT t.*, i.name as item_name, i.code as item_code, i.price as item_price, 
-                   i.is_deleted as item_deleted,
+                   i.is_deleted as item_deleted, i.current_stock as item_stock,
                    c.name as category_name, c.id as category_id, c.is_deleted as category_deleted
             FROM transactions t 
             LEFT JOIN items i ON t.item_id = i.id 
@@ -32,6 +32,7 @@ export async function GET(request: Request) {
             itemCode: row.item_code,
             itemPrice: row.item_price || 0,
             itemDeleted: row.item_deleted,
+            itemStock: row.item_stock || 0,
             categoryId: row.category_id,
             categoryName: row.category_name,
             categoryDeleted: row.category_deleted,
