@@ -13,13 +13,18 @@ export async function GET(request: Request) {
 
         const url = new URL(request.url);
         const categoryId = url.searchParams.get('category');
+        const includeDeleted = url.searchParams.get('includeDeleted') === 'true';
 
         let query = `
             SELECT i.*, c.name as category_name 
             FROM items i 
             LEFT JOIN categories c ON i.category_id = c.id
-            WHERE i.is_deleted = 0
+            WHERE 1=1
         `;
+
+        if (!includeDeleted) {
+            query += ` AND i.is_deleted = 0`;
+        }
 
         if (categoryId) {
             query += ` AND i.category_id = ?`;

@@ -15,11 +15,14 @@ export async function GET(
             return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
         }
 
+        const url = new URL(request.url);
+        const includeDeleted = url.searchParams.get('includeDeleted') === 'true';
+
         const result = await db.prepare(`
             SELECT i.*, c.name as category_name 
             FROM items i 
             LEFT JOIN categories c ON i.category_id = c.id
-            WHERE i.id = ? AND i.is_deleted = 0
+            WHERE i.id = ? ${includeDeleted ? '' : 'AND i.is_deleted = 0'}
         `).bind(id).first();
 
         if (!result) {
@@ -58,7 +61,26 @@ export async function PUT(
         }
 
         const body = await request.json();
-        const { name, categoryId, price } = body;
+        const { name, categoryId, price, adjustment, restore } = body;
+
+        // Restore logic
+        if (restore) {
+            const currentItem = await db.prepare(`SELECT name, code, is_deleted FROM items WHERE id = ?`).bind(id).first();
+            if (!currentItem) return NextResponse.json({ error: 'Item not found' }, { status: 404 });
+            if (currentItem.is_deleted === 0) return NextResponse.json({ error: 'Item already active' }, { status: 400 });
+
+            // Remove suffix if exists to check for collisions
+            const originalName = (currentItem.name as string).replace(/-DEL-\d+$/, '');
+            const originalCode = (currentItem.code as string).replace(/-DEL-\d+$/, '');
+
+            const collision = await db.prepare(`SELECT id FROM items WHERE (name = ? OR code = ?) AND is_deleted = 0`).bind(originalName, originalCode).first();
+            if (collision) {
+                return NextResponse.json({ error: 'Nama atau kode barang sudah digunakan oleh barang aktif lain' }, { status: 400 });
+            }
+
+            await db.prepare(`UPDATE items SET name = ?, code = ?, is_deleted = 0 WHERE id = ?`).bind(originalName, originalCode, id).run();
+            return NextResponse.json({ success: true, message: 'Item restored' });
+        }
 
         // Validation
         if (name !== undefined) {
@@ -99,6 +121,28 @@ export async function PUT(
             values.push(price);
         }
 
+        // Direct Stock Adjustment (Correction)
+        if (adjustment !== undefined) {
+            const currentItem = await db.prepare(`SELECT current_stock FROM items WHERE id = ?`).bind(id).first();
+            const oldStock = (currentItem?.current_stock as number) || 0;
+            const newStock = adjustment;
+            const diff = newStock - oldStock;
+
+            if (diff !== 0) {
+                updates.push('current_stock = ?');
+                values.push(newStock);
+
+                // Create audit trail transaction
+                const txId = crypto.randomUUID();
+                const txType = diff > 0 ? 'IN' : 'OUT';
+                const txQty = Math.abs(diff);
+                await db.prepare(`
+                    INSERT INTO transactions (id, item_id, type, quantity, notes, sync_status)
+                    VALUES (?, ?, ?, ?, ?, 'SYNCED')
+                `).bind(txId, id, txType, txQty, '[ADJUSTMENT] Koreksi Stok').run();
+            }
+        }
+
         if (updates.length === 0) {
             return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
         }
@@ -131,9 +175,16 @@ export async function DELETE(
             return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
         }
 
-        await db.prepare(`
-            UPDATE items SET is_deleted = 1 WHERE id = ?
-        `).bind(id).run();
+        const currentItem = await db.prepare(`SELECT name, code FROM items WHERE id = ?`).bind(id).first();
+        if (currentItem) {
+            const timestamp = Date.now();
+            const newName = `${currentItem.name}-DEL-${timestamp}`;
+            const newCode = `${currentItem.code}-DEL-${timestamp}`;
+
+            await db.prepare(`
+                UPDATE items SET is_deleted = 1, name = ?, code = ? WHERE id = ?
+            `).bind(newName, newCode, id).run();
+        }
 
         return NextResponse.json({ success: true });
     } catch (err) {

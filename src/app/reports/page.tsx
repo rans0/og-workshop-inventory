@@ -12,8 +12,10 @@ interface Transaction {
     itemName: string;
     itemCode: string;
     itemPrice: number;
+    itemDeleted: number;
     categoryId: string;
     categoryName: string;
+    categoryDeleted: number;
     type: 'IN' | 'OUT';
     quantity: number;
     createdAt: string;
@@ -94,7 +96,7 @@ export default function ReportsPage() {
             if (!categoryMap.has(categoryId)) {
                 categoryMap.set(categoryId, {
                     categoryId,
-                    categoryName,
+                    categoryName: categoryName + (tx.categoryDeleted ? ' (Terhapus)' : ''),
                     items: [],
                     totalIn: 0,
                     totalOut: 0,
@@ -110,8 +112,8 @@ export default function ReportsPage() {
             if (!item) {
                 item = {
                     id: tx.itemId,
-                    name: tx.itemName || 'Barang Terhapus',
-                    code: tx.itemCode || '-',
+                    name: (tx.itemName || 'Barang Terhapus') + (tx.itemDeleted ? ' (Terhapus)' : ''),
+                    code: (tx.itemCode || '-').replace(/-DEL-\d+$/, ''), // Clean code for display
                     price: tx.itemPrice || 0,
                     inQty: 0,
                     outQty: 0,

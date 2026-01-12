@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 // GET all categories
-export async function GET() {
+export async function GET(request: Request) {
     try {
         const { env } = await getCloudflareContext();
         const db = env.DB;
@@ -11,17 +11,21 @@ export async function GET() {
             return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
         }
 
+        const url = new URL(request.url);
+        const includeDeleted = url.searchParams.get('includeDeleted') === 'true';
+
         // Get categories with item count and total stock
         const result = await db.prepare(`
             SELECT 
                 c.id,
                 c.name,
                 c.created_at,
+                c.is_deleted as category_deleted,
                 COUNT(i.id) as item_count,
                 COALESCE(SUM(i.current_stock), 0) as total_stock
             FROM categories c
             LEFT JOIN items i ON c.id = i.category_id AND i.is_deleted = 0
-            WHERE c.is_deleted = 0
+            WHERE 1=1 ${includeDeleted ? '' : 'AND c.is_deleted = 0'}
             GROUP BY c.id
             ORDER BY c.name
         `).all();
@@ -30,6 +34,7 @@ export async function GET() {
             id: row.id,
             name: row.name,
             createdAt: row.created_at,
+            isDeleted: row.category_deleted,
             itemCount: row.item_count,
             totalStock: row.total_stock
         }));

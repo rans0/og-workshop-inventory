@@ -10,6 +10,8 @@ export async function GET(
         const { env } = await getCloudflareContext();
         const db = env.DB;
         const { id } = await params;
+        const url = new URL(request.url);
+        const includeDeleted = url.searchParams.get('includeDeleted') === 'true';
 
         if (!db) {
             return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
@@ -17,16 +19,16 @@ export async function GET(
 
         // Get category
         const categoryResult = await db.prepare(`
-            SELECT * FROM categories WHERE id = ? AND is_deleted = 0
+            SELECT * FROM categories WHERE id = ? ${includeDeleted ? '' : 'AND is_deleted = 0'}
         `).bind(id).first();
 
         if (!categoryResult) {
             return NextResponse.json({ error: 'Category not found' }, { status: 404 });
         }
 
-        // Get items in this category (only active items)
+        // Get items in this category
         const itemsResult = await db.prepare(`
-            SELECT * FROM items WHERE category_id = ? AND is_deleted = 0 ORDER BY name
+            SELECT * FROM items WHERE category_id = ? ${includeDeleted ? '' : 'AND is_deleted = 0'} ORDER BY name
         `).bind(id).all();
 
         const items = itemsResult.results.map((row: Record<string, unknown>) => ({
@@ -67,7 +69,22 @@ export async function PUT(
         }
 
         const body = await request.json();
-        const { name } = body;
+        const { name, restore } = body;
+
+        // Restore logic
+        if (restore) {
+            const current = await db.prepare(`SELECT name, is_deleted FROM categories WHERE id = ?`).bind(id).first();
+            if (!current) return NextResponse.json({ error: 'Category not found' }, { status: 404 });
+            if (current.is_deleted === 0) return NextResponse.json({ error: 'Category already active' }, { status: 400 });
+
+            const originalName = (current.name as string).replace(/-DEL-\d+$/, '');
+            const collision = await db.prepare(`SELECT id FROM categories WHERE name = ? AND is_deleted = 0`).bind(originalName).first();
+            if (collision) return NextResponse.json({ error: 'Nama kategori sudah digunakan oleh kategori aktif lain' }, { status: 400 });
+
+            await db.prepare(`UPDATE categories SET name = ?, is_deleted = 0 WHERE id = ?`).bind(originalName, id).run();
+            // Note: restoring category does NOT automatically restore items. User should restore items manually.
+            return NextResponse.json({ success: true, message: 'Category restored' });
+        }
 
         if (!name || typeof name !== 'string' || name.trim().length < 2) {
             return NextResponse.json({ error: 'Nama kategori minimal 2 karakter' }, { status: 400 });
@@ -106,15 +123,24 @@ export async function DELETE(
             return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
         }
 
-        // Soft delete items (cascade)
-        await db.prepare(`
-            UPDATE items SET is_deleted = 1 WHERE category_id = ?
-        `).bind(id).run();
+        const category = await db.prepare(`SELECT name FROM categories WHERE id = ?`).bind(id).first();
+        if (category) {
+            const timestamp = Date.now();
+            const newCatName = `${category.name}-DEL-${timestamp}`;
 
-        // Soft delete category
-        await db.prepare(`
-            UPDATE categories SET is_deleted = 1 WHERE id = ?
-        `).bind(id).run();
+            // Soft delete items in this category and suffix them too
+            const items = await db.prepare(`SELECT id, name, code FROM items WHERE category_id = ? AND is_deleted = 0`).bind(id).all();
+            for (const item of items.results) {
+                const newItemName = `${item.name}-DEL-${timestamp}`;
+                const newItemCode = `${item.code}-DEL-${timestamp}`;
+                await db.prepare(`UPDATE items SET is_deleted = 1, name = ?, code = ? WHERE id = ?`).bind(newItemName, newItemCode, item.id).run();
+            }
+
+            // Soft delete category
+            await db.prepare(`
+                UPDATE categories SET is_deleted = 1, name = ? WHERE id = ?
+            `).bind(newCatName, id).run();
+        }
 
         return NextResponse.json({ success: true });
     } catch (err) {

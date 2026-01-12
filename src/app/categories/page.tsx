@@ -214,7 +214,7 @@ export default function CategoriesPage() {
             <ConfirmDialog
                 open={!!deleteTarget}
                 title="Hapus Kategori?"
-                message={`Semua barang dalam kategori "${deleteTarget?.name}" akan ikut terhapus. Histori transaksi tetap disimpan.`}
+                message={`Kategori ini berisi ${deleteTarget?.itemCount} barang. Menghapus kategori "${deleteTarget?.name}" akan ikut menyembunyikan semua barang di dalamnya.`}
                 confirmText="Hapus"
                 onConfirm={deleteCategory}
                 onCancel={() => setDeleteTarget(null)}

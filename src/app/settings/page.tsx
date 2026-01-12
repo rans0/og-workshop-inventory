@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowLeft, Info, Database, Wifi, LogOut, ChevronRight, User, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Info, Database, Wifi, LogOut, ChevronRight, User, ShieldCheck, History as HistoryIcon } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SettingsPage() {
@@ -52,6 +52,25 @@ export default function SettingsPage() {
                         </div>
                         <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-red-300" />
                     </button>
+                </div>
+            </section>
+
+            {/* Deleted Data Section */}
+            <section className="space-y-3">
+                <h2 className="text-xs sm:text-sm font-black text-slate-400 uppercase tracking-widest ml-1">Manajemen Data</h2>
+                <div className="card !p-0 overflow-hidden">
+                    <Link
+                        href="/settings/deleted"
+                        className="w-full p-4 sm:p-5 flex items-center justify-between hover:bg-slate-50 transition-colors group"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-orange-50 text-orange-500 rounded-lg group-hover:bg-orange-100">
+                                <HistoryIcon className="w-5 h-5" />
+                            </div>
+                            <span className="font-bold text-slate-700">Barang & Kategori Terhapus</span>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-500" />
+                    </Link>
                 </div>
             </section>
 
