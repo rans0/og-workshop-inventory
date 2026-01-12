@@ -28,7 +28,6 @@ export default function ItemsPage() {
 
     const [isAdding, setIsAdding] = useState(false);
     const [editingItem, setEditingItem] = useState<Item | null>(null);
-    const [deleteTarget, setDeleteTarget] = useState<Item | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
 
     const [formData, setFormData] = useState({
@@ -156,22 +155,6 @@ export default function ItemsPage() {
         }
     };
 
-    const deleteItem = async () => {
-        if (!deleteTarget) return;
-
-        try {
-            const res = await fetch(`/api/items/${deleteTarget.id}`, {
-                method: 'DELETE'
-            });
-
-            if (res.ok) {
-                setDeleteTarget(null);
-                fetchData();
-            }
-        } catch {
-            alert('Gagal menghapus barang!');
-        }
-    };
 
     const startEdit = (item: Item) => {
         setEditingItem(item);
@@ -355,12 +338,6 @@ export default function ItemsPage() {
                                     >
                                         <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </button>
-                                    <button
-                                        onClick={() => setDeleteTarget(item)}
-                                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                                    >
-                                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -368,14 +345,6 @@ export default function ItemsPage() {
                 </div>
             )}
 
-            <ConfirmDialog
-                open={!!deleteTarget}
-                title="Hapus Barang?"
-                message={`Barang "${deleteTarget?.name}" akan dihapus. Histori transaksi tetap disimpan.`}
-                confirmText="Hapus"
-                onConfirm={deleteItem}
-                onCancel={() => setDeleteTarget(null)}
-            />
         </main>
     );
 }

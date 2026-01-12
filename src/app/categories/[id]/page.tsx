@@ -29,7 +29,6 @@ export default function CategoryDetailPage({ params }: { params: Promise<{ id: s
     const [newItemName, setNewItemName] = useState('');
     const [newItemPrice, setNewItemPrice] = useState('');
     const [newItemStock, setNewItemStock] = useState('');
-    const [deleteTarget, setDeleteTarget] = useState<Item | null>(null);
 
     const fetchCategory = React.useCallback(async () => {
         try {
@@ -101,22 +100,6 @@ export default function CategoryDetailPage({ params }: { params: Promise<{ id: s
         }
     };
 
-    const deleteItem = async () => {
-        if (!deleteTarget) return;
-
-        try {
-            const res = await fetch(`/api/items/${deleteTarget.id}`, {
-                method: 'DELETE'
-            });
-
-            if (res.ok) {
-                setDeleteTarget(null);
-                fetchCategory();
-            }
-        } catch {
-            alert('Gagal menghapus barang');
-        }
-    };
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('id-ID', {
@@ -256,12 +239,6 @@ export default function CategoryDetailPage({ params }: { params: Promise<{ id: s
                                     >
                                         <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </Link>
-                                    <button
-                                        onClick={() => setDeleteTarget(item)}
-                                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
-                                    >
-                                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -269,14 +246,6 @@ export default function CategoryDetailPage({ params }: { params: Promise<{ id: s
                 )}
             </div>
 
-            <ConfirmDialog
-                open={!!deleteTarget}
-                title="Hapus Barang?"
-                message={`Barang "${deleteTarget?.name}" akan dihapus. Histori transaksi tetap disimpan.`}
-                confirmText="Hapus"
-                onConfirm={deleteItem}
-                onCancel={() => setDeleteTarget(null)}
-            />
         </main>
     );
 }
