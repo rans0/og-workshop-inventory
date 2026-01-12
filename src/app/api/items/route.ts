@@ -18,10 +18,11 @@ export async function GET(request: Request) {
             SELECT i.*, c.name as category_name 
             FROM items i 
             LEFT JOIN categories c ON i.category_id = c.id
+            WHERE i.is_deleted = 0
         `;
 
         if (categoryId) {
-            query += ` WHERE i.category_id = ?`;
+            query += ` AND i.category_id = ?`;
         }
 
         query += ` ORDER BY i.name`;
@@ -74,8 +75,8 @@ export async function POST(request: Request) {
 
         const trimmedName = name.trim();
 
-        // Check for duplicates in the SAME category
-        const existing = await db.prepare(`SELECT id FROM items WHERE name = ? AND category_id = ? COLLATE NOCASE`).bind(trimmedName, categoryId).first();
+        // Check for duplicates in the SAME category (only active items)
+        const existing = await db.prepare(`SELECT id FROM items WHERE name = ? AND category_id = ? AND is_deleted = 0 COLLATE NOCASE`).bind(trimmedName, categoryId).first();
         if (existing) {
             return NextResponse.json({ error: 'Nama barang sudah ada di kategori ini' }, { status: 400 });
         }

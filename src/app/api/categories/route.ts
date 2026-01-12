@@ -20,7 +20,8 @@ export async function GET() {
                 COUNT(i.id) as item_count,
                 COALESCE(SUM(i.current_stock), 0) as total_stock
             FROM categories c
-            LEFT JOIN items i ON c.id = i.category_id
+            LEFT JOIN items i ON c.id = i.category_id AND i.is_deleted = 0
+            WHERE c.is_deleted = 0
             GROUP BY c.id
             ORDER BY c.name
         `).all();
@@ -59,8 +60,8 @@ export async function POST(request: Request) {
 
         const trimmedName = name.trim();
 
-        // Check for duplicates
-        const existing = await db.prepare(`SELECT id FROM categories WHERE name = ? COLLATE NOCASE`).bind(trimmedName).first();
+        // Check for duplicates (only active categories)
+        const existing = await db.prepare(`SELECT id FROM categories WHERE name = ? AND is_deleted = 0 COLLATE NOCASE`).bind(trimmedName).first();
         if (existing) {
             return NextResponse.json({ error: 'Nama kategori sudah ada' }, { status: 400 });
         }

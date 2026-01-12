@@ -17,16 +17,16 @@ export async function GET(
 
         // Get category
         const categoryResult = await db.prepare(`
-            SELECT * FROM categories WHERE id = ?
+            SELECT * FROM categories WHERE id = ? AND is_deleted = 0
         `).bind(id).first();
 
         if (!categoryResult) {
             return NextResponse.json({ error: 'Category not found' }, { status: 404 });
         }
 
-        // Get items in this category
+        // Get items in this category (only active items)
         const itemsResult = await db.prepare(`
-            SELECT * FROM items WHERE category_id = ? ORDER BY name
+            SELECT * FROM items WHERE category_id = ? AND is_deleted = 0 ORDER BY name
         `).bind(id).all();
 
         const items = itemsResult.results.map((row: Record<string, unknown>) => ({
@@ -75,14 +75,14 @@ export async function PUT(
 
         const trimmedName = name.trim();
 
-        // Check for duplicates (excluding the current category)
-        const existing = await db.prepare(`SELECT id FROM categories WHERE name = ? AND id != ? COLLATE NOCASE`).bind(trimmedName, id).first();
+        // Check for duplicates (excluding the current category, only active ones)
+        const existing = await db.prepare(`SELECT id FROM categories WHERE name = ? AND id != ? AND is_deleted = 0 COLLATE NOCASE`).bind(trimmedName, id).first();
         if (existing) {
             return NextResponse.json({ error: 'Nama kategori sudah ada' }, { status: 400 });
         }
 
         await db.prepare(`
-            UPDATE categories SET name = ? WHERE id = ?
+            UPDATE categories SET name = ? WHERE id = ? AND is_deleted = 0
         `).bind(trimmedName, id).run();
 
         return NextResponse.json({ id, name: trimmedName });
@@ -106,14 +106,14 @@ export async function DELETE(
             return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
         }
 
-        // Delete items first (cascade)
+        // Soft delete items (cascade)
         await db.prepare(`
-            DELETE FROM items WHERE category_id = ?
+            UPDATE items SET is_deleted = 1 WHERE category_id = ?
         `).bind(id).run();
 
-        // Delete category
+        // Soft delete category
         await db.prepare(`
-            DELETE FROM categories WHERE id = ?
+            UPDATE categories SET is_deleted = 1 WHERE id = ?
         `).bind(id).run();
 
         return NextResponse.json({ success: true });

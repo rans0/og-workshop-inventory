@@ -66,6 +66,12 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'type must be IN or OUT' }, { status: 400 });
         }
 
+        // Check if item exists and is not deleted
+        const item = await db.prepare(`SELECT id FROM items WHERE id = ? AND is_deleted = 0`).bind(itemId).first();
+        if (!item) {
+            return NextResponse.json({ error: 'Item tidak ditemukan atau sudah dihapus' }, { status: 404 });
+        }
+
         const id = crypto.randomUUID();
 
         // Insert transaction

@@ -19,7 +19,7 @@ export async function GET(
             SELECT i.*, c.name as category_name 
             FROM items i 
             LEFT JOIN categories c ON i.category_id = c.id
-            WHERE i.id = ?
+            WHERE i.id = ? AND i.is_deleted = 0
         `).bind(id).first();
 
         if (!result) {
@@ -80,7 +80,7 @@ export async function PUT(
                 catToCheck = currentItem?.category_id as string;
             }
 
-            const existing = await db.prepare(`SELECT id FROM items WHERE name = ? AND category_id = ? AND id != ? COLLATE NOCASE`)
+            const existing = await db.prepare(`SELECT id FROM items WHERE name = ? AND category_id = ? AND id != ? AND is_deleted = 0 COLLATE NOCASE`)
                 .bind(trimmedName, catToCheck, id).first();
 
             if (existing) {
@@ -107,7 +107,7 @@ export async function PUT(
         values.push(id);
 
         await db.prepare(`
-            UPDATE items SET ${updates.join(', ')} WHERE id = ?
+            UPDATE items SET ${updates.join(', ')} WHERE id = ? AND is_deleted = 0
         `).bind(...values).run();
 
         return NextResponse.json({ success: true });
@@ -132,7 +132,7 @@ export async function DELETE(
         }
 
         await db.prepare(`
-            DELETE FROM items WHERE id = ?
+            UPDATE items SET is_deleted = 1 WHERE id = ?
         `).bind(id).run();
 
         return NextResponse.json({ success: true });
