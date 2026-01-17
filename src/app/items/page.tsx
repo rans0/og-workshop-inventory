@@ -178,10 +178,17 @@ export default function ItemsPage() {
         });
     };
 
-    const filteredItems = items.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.code.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filter = searchParams.get('filter');
+    const filteredItems = items.filter(item => {
+        const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.code.toLowerCase().includes(searchQuery.toLowerCase());
+
+        if (filter === 'low-stock') {
+            return matchesSearch && item.currentStock < 2;
+        }
+
+        return matchesSearch;
+    });
 
     return (
         <main className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
@@ -190,15 +197,19 @@ export default function ItemsPage() {
                     <Link href="/" className="p-2 sm:p-3 bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 active:scale-95 transition-transform">
                         <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                     </Link>
-                    <h1 className="text-xl sm:text-3xl font-bold">Daftar Barang</h1>
+                    <h1 className="text-xl sm:text-3xl font-bold">
+                        {filter === 'low-stock' ? 'Stok Tipis' : 'Daftar Barang'}
+                    </h1>
                 </div>
-                <button
-                    onClick={() => setIsAdding(!isAdding)}
-                    className="p-3 sm:p-4 bg-green-600 text-white flex items-center gap-2 rounded-xl sm:rounded-2xl font-bold active:scale-95 transition-all"
-                >
-                    <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
-                    <span className="hidden sm:inline">Tambah</span>
-                </button>
+                {filter !== 'low-stock' && (
+                    <button
+                        onClick={() => setIsAdding(!isAdding)}
+                        className="p-3 sm:p-4 bg-green-600 text-white flex items-center gap-2 rounded-xl sm:rounded-2xl font-bold active:scale-95 transition-all"
+                    >
+                        <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="hidden sm:inline">Tambah</span>
+                    </button>
+                )}
             </header>
 
             {/* Search Bar */}

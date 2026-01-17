@@ -57,7 +57,7 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  const lowStockItems = items.filter(i => i.currentStock < 2).slice(0, 3);
+  const lowStockItems = items.filter(i => i.currentStock < 2).slice(0, 5);
 
   return (
     <main className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8 pb-12">
@@ -152,10 +152,15 @@ export default function Dashboard() {
       {/* Low Stock Alert */}
       {lowStockItems.length > 0 && (
         <section className="card border-red-100 bg-red-50/30 space-y-3 sm:space-y-4 !p-4 sm:!p-6">
-          <h2 className="text-lg sm:text-xl font-bold text-red-800 flex items-center gap-2">
-            <Package className="w-5 h-5" />
-            Stok Tipis!
-          </h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg sm:text-xl font-bold text-red-800 flex items-center gap-2">
+              <Package className="w-5 h-5" />
+              Stok Tipis!
+            </h2>
+            <Link href="/items?filter=low-stock" className="text-red-700 font-bold flex items-center gap-1 text-sm">
+              Semua <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
           <div className="grid grid-cols-1 gap-2">
             {lowStockItems.map(item => (
               <button
