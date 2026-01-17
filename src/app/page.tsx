@@ -5,7 +5,6 @@ import { PlusCircle, MinusCircle, Package, History as HistoryIcon, Settings, Arr
 import Link from 'next/link';
 import QuickActionModal, { Item } from '@/components/QuickActionModal';
 
-// QuickActionModal removed and moved to @/components/QuickActionModal
 
 interface Transaction {
   id: string;
@@ -63,7 +62,6 @@ export default function Dashboard() {
 
   return (
     <main className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8 pb-12">
-      {/* Header */}
       <header className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900">Ratu Motor</h1>
@@ -74,7 +72,6 @@ export default function Dashboard() {
         </Link>
       </header>
 
-      {/* Main Actions */}
       <div className="grid grid-cols-2 gap-3 sm:gap-6">
         <Link href="/transaction/in" className="flex flex-col items-center justify-center p-4 sm:p-8 rounded-2xl sm:rounded-3xl shadow-lg border-4 transition-all active:scale-95 text-center bg-green-600 text-white border-green-700 min-h-[120px] sm:min-h-[180px]">
           <PlusCircle className="w-10 h-10 sm:w-16 sm:h-16 mb-2 sm:mb-4" />
@@ -88,7 +85,6 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      {/* Quick Access */}
       <div className="grid grid-cols-4 gap-2 sm:gap-4">
         <Link href="/items" className="bg-white p-3 sm:p-6 rounded-xl sm:rounded-3xl shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center active:scale-95 transition-all">
           <Package className="w-6 h-6 sm:w-10 sm:h-10 text-blue-600 mb-1 sm:mb-2" />
@@ -108,7 +104,6 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      {/* Recently Updated */}
       <section className="card space-y-4 !p-4 sm:!p-6">
         <div className="flex justify-between items-center">
           <h2 className="text-lg sm:text-2xl font-bold flex items-center gap-2">
@@ -151,7 +146,6 @@ export default function Dashboard() {
         )}
       </section>
 
-      {/* Low Stock Alert */}
       {lowStockItems.length > 0 && (
         <section className="card border-red-100 bg-red-50/30 space-y-3 sm:space-y-4 !p-4 sm:!p-6">
           <div className="flex justify-between items-center">
@@ -180,7 +174,6 @@ export default function Dashboard() {
         </section>
       )}
 
-      {/* Quick Action Modal */}
       {selectedItem && (
         <QuickActionModal item={selectedItem} onRefresh={fetchData} onClose={() => setSelectedItem(null)} />
       )}

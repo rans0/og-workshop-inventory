@@ -17,7 +17,7 @@ interface Transaction {
     categoryDeleted: number;
     type: 'IN' | 'OUT';
     quantity: number;
-    notes: string; // Added missing field
+    notes: string;
     createdAt: string;
 }
 
@@ -31,13 +31,13 @@ interface CategorySummary {
         price: number;
         inQty: number;
         outQty: number;
-        adjQty: number; // New field for stock adjustments
+        adjQty: number;
         inValue: number;
         outValue: number;
     }[];
     totalIn: number;
     totalOut: number;
-    totalAdj: number; // New total field for category adjustments
+    totalAdj: number;
     totalInValue: number;
     totalOutValue: number;
     expanded: boolean;
@@ -103,7 +103,6 @@ export default function ReportsPage() {
             return true;
         });
 
-        // Group by category
         const categoryMap = new Map<string, CategorySummary>();
 
         filtered.forEach(tx => {
@@ -131,7 +130,7 @@ export default function ReportsPage() {
                 item = {
                     id: tx.itemId,
                     name: (tx.itemName || 'Barang Terhapus') + (tx.itemDeleted ? ' (Terhapus)' : ''),
-                    code: (tx.itemCode || '-').replace(/-DEL-\d+$/, ''), // Clean code for display
+                    code: (tx.itemCode || '-').replace(/-DEL-\d+$/, ''),
                     price: tx.itemPrice || 0,
                     inQty: 0,
                     outQty: 0,
@@ -149,12 +148,9 @@ export default function ReportsPage() {
                 item.adjQty += adjDelta;
                 category.totalAdj += adjDelta;
 
-                // ADJUSTMENT now also impacts Modal Value (Capital Correction)
                 const adjValue = adjDelta * (tx.itemPrice || 0);
                 item.inValue += adjValue;
                 category.totalInValue += adjValue;
-                // Note: inQty still only counts original 'Belanja' for statistics?
-                // Actually user said 'modal saya hanya 10 pcs', suggesting they want the PCS count corrected too.
                 item.inQty += adjDelta;
                 category.totalIn += adjDelta;
             } else if (tx.type === 'IN') {
@@ -172,8 +168,6 @@ export default function ReportsPage() {
 
         setCategorySummaries(Array.from(categoryMap.values()));
 
-        // Calculate Top 3 Items Out
-        // 1. Determine day count for threshold
         let dayCount = 1;
         if (startDate && endDate) {
             dayCount = Math.floor((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -186,7 +180,6 @@ export default function ReportsPage() {
 
         const threshold = 5 * dayCount;
 
-        // 2. Aggregate quantity out
         const outMap = new Map<string, { name: string, qty: number }>();
         filtered.filter(tx => tx.type === 'OUT' && !tx.notes?.includes('[ADJUSTMENT]')).forEach(tx => {
             const current = outMap.get(tx.itemId) || { name: tx.itemName || 'Barang Terhapus', qty: 0 };
@@ -196,7 +189,6 @@ export default function ReportsPage() {
             });
         });
 
-        // 3. Filter by threshold and sort
         const sortedTop = Array.from(outMap.entries())
             .map(([id, data]) => ({ id, name: data.name, quantity: data.qty }))
             .filter(item => item.quantity >= threshold)
@@ -264,7 +256,6 @@ export default function ReportsPage() {
                 </div>
             </header>
 
-            {/* Date Filter Selection */}
             <div className="card !p-4 sm:!p-6 bg-slate-50 border-slate-200">
                 <div className="flex flex-col sm:flex-row items-end gap-4">
                     <div className="flex-1 w-full space-y-1.5">
@@ -308,9 +299,7 @@ export default function ReportsPage() {
                 <p className="text-center text-slate-400 py-20">Memuat...</p>
             ) : (
                 <>
-                    {/* Grand Total Cards - Optimized for Large Numbers */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pb-2">
-                        {/* Uang Modal */}
                         <div className="card border-blue-100 bg-blue-50/20 !p-4 flex flex-col gap-3 min-w-0">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 bg-blue-100 text-blue-600 rounded-xl shrink-0">
@@ -331,7 +320,6 @@ export default function ReportsPage() {
                             </div>
                         </div>
 
-                        {/* Uang Keluar */}
                         <div className="card border-orange-100 bg-orange-50/20 !p-4 flex flex-col gap-3 min-w-0">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 bg-orange-100 text-orange-600 rounded-xl shrink-0">
@@ -352,7 +340,6 @@ export default function ReportsPage() {
                             </div>
                         </div>
 
-                        {/* Koreksi Stok */}
                         <div className="card border-slate-200 bg-slate-50 !p-4 flex flex-col gap-3 min-w-0">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 bg-slate-200 text-slate-500 rounded-xl shrink-0">
@@ -373,7 +360,6 @@ export default function ReportsPage() {
                             </div>
                         </div>
 
-                        {/* Top 3 Barang Card */}
                         <div className="card border-yellow-200 bg-yellow-50/20 !p-4 flex flex-col gap-3 min-w-0 sm:col-span-2 lg:col-span-3">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 bg-yellow-100 text-yellow-600 rounded-xl shrink-0">
@@ -406,7 +392,6 @@ export default function ReportsPage() {
                         </div>
                     </div>
 
-                    {/* Category Summaries (Expandable) */}
                     <div className="space-y-3">
                         {categorySummaries.length === 0 ? (
                             <div className="card text-center py-12 text-slate-400 italic">

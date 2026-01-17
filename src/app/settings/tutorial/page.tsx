@@ -92,21 +92,11 @@ export default function TutorialPage() {
                     </li>
                     <li>
                         <span className="font-bold text-slate-800 uppercase text-xs">Filter Periode:</span>
-                        <br /><span className="ml-5">Gunakan tombol tabs (Hari, Minggu, Bulan, dll) di bagian atas untuk melihat performa dalam waktu tertentu.</span>
+                        <br /><span className="ml-5">Gunakan pilihan Kalender (Mulai & Sampai Tanggal) di bagian atas untuk melihat performa dalam rentang waktu yang spesifik.</span>
                     </li>
                 </ul>
             </SopSection>
 
-            {/* Section: Hapus & Restore */}
-            <SopSection icon={<Trash2 className="w-6 h-6" />} title="Penghapusan & Pemulihan">
-                <p>Jika salah input barang/kategori atau ada kategori yang tidak dipakai lagi:</p>
-                <ol className="list-decimal list-inside space-y-2 ml-1">
-                    <li>Buka menu Kategori atau Barang.</li>
-                    <li>Klik ikon **Sampah** untuk menghapus (Data akan disembunyikan).</li>
-                    <li>Jika ingin mengembalikan, buka **Pengaturan → Manajemen Data → Data Terhapus**.</li>
-                    <li>Klik **Restore** untuk menampilkan kembali ke daftar aktif tanpa kehilangan histori transaksi.</li>
-                </ol>
-            </SopSection>
 
             <footer className="text-center pt-8">
                 <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">SOP Versi 2.0 • Ratu Motor</p>

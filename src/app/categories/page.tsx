@@ -186,7 +186,6 @@ export default function CategoriesPage() {
                                 </Link>
                             </div>
 
-                            {/* Inline Edit Form */}
                             {editingId === cat.id && (
                                 <form
                                     onSubmit={(e) => { e.preventDefault(); updateCategory(cat.id); }}

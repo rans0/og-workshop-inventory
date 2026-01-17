@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 
-// GET transactions with filters
 export async function GET(request: Request) {
     try {
         const { env } = await getCloudflareContext();
@@ -54,7 +53,6 @@ export async function GET(request: Request) {
     }
 }
 
-// POST create new transaction
 export async function POST(request: Request) {
     try {
         const { env } = await getCloudflareContext();
@@ -75,7 +73,6 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'type must be IN or OUT' }, { status: 400 });
         }
 
-        // Check if item exists and is not deleted
         const item = await db.prepare(`SELECT id FROM items WHERE id = ? AND is_deleted = 0`).bind(itemId).first();
         if (!item) {
             return NextResponse.json({ error: 'Item tidak ditemukan atau sudah dihapus' }, { status: 404 });
@@ -83,13 +80,11 @@ export async function POST(request: Request) {
 
         const id = crypto.randomUUID();
 
-        // Insert transaction
         await db.prepare(`
             INSERT INTO transactions (id, item_id, type, quantity, notes, sync_status)
             VALUES (?, ?, ?, ?, ?, 'SYNCED')
         `).bind(id, itemId, type, quantity, notes).run();
 
-        // Update item stock
         const stockDelta = type === 'IN' ? quantity : -quantity;
         await db.prepare(`
             UPDATE items 

@@ -56,7 +56,6 @@ export default function HistoryPage() {
                 <h1 className="text-xl sm:text-3xl font-bold">Riwayat Transaksi</h1>
             </header>
 
-            {/* Search */}
             <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 sm:w-6 sm:h-6" />
                 <input

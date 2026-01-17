@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 
-// GET all items with category info
 export async function GET(request: Request) {
     try {
         const { env } = await getCloudflareContext();
@@ -57,7 +56,6 @@ export async function GET(request: Request) {
     }
 }
 
-// POST create new item
 export async function POST(request: Request) {
     try {
         const { env } = await getCloudflareContext();
@@ -80,7 +78,6 @@ export async function POST(request: Request) {
 
         const trimmedName = name.trim();
 
-        // Check for duplicates in the SAME category (only active items)
         const existing = await db.prepare(`SELECT id FROM items WHERE name = ? AND category_id = ? AND is_deleted = 0 COLLATE NOCASE`).bind(trimmedName, categoryId).first();
         if (existing) {
             return NextResponse.json({ error: 'Nama barang sudah ada di kategori ini' }, { status: 400 });
@@ -88,7 +85,6 @@ export async function POST(request: Request) {
 
         const id = crypto.randomUUID();
 
-        // Generate item code
         const countResult = await db.prepare(`SELECT COUNT(*) as count FROM items`).first();
         const count = (countResult?.count as number) || 0;
         const code = `WS-${String(count + 1).padStart(4, '0')}`;

@@ -212,7 +212,6 @@ export default function ItemsPage() {
                 )}
             </header>
 
-            {/* Search Bar */}
             <div className="relative group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                 <input
@@ -232,7 +231,6 @@ export default function ItemsPage() {
                 )}
             </div>
 
-            {/* Add Form */}
             {isAdding && (
                 <form onSubmit={addItem} className="card space-y-4 border-green-200 bg-green-50/50 !p-4 sm:!p-6">
                     <div className="flex items-center justify-between">
@@ -299,7 +297,6 @@ export default function ItemsPage() {
                 </form>
             )}
 
-            {/* Item List */}
             {loading ? (
                 <p className="text-center text-slate-400 py-20">Memuat...</p>
             ) : items.length === 0 && !isAdding ? (
@@ -364,7 +361,6 @@ export default function ItemsPage() {
                                 </div>
                             </div>
 
-                            {/* Inline Edit Form */}
                             {editingItem?.id === item.id && (
                                 <form onSubmit={updateItem} className="card space-y-4 border-blue-200 bg-blue-50/50 !p-4 sm:!p-6 animate-slide-up">
                                     <div className="flex items-center justify-between">
