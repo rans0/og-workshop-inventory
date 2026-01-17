@@ -338,7 +338,7 @@ export default function ItemsPage() {
                                 <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-6 shrink-0">
                                     <div className="text-right">
                                         <p className="text-[10px] sm:text-sm font-black text-slate-500 uppercase tracking-tighter">STOK</p>
-                                        <p className={`text-2xl sm:text-5xl font-black leading-none ${item.currentStock < 5 ? 'text-red-600' : 'text-slate-900'}`}>
+                                        <p className={`text-2xl sm:text-5xl font-black leading-none ${item.currentStock < 2 ? 'text-red-600' : 'text-slate-900'}`}>
                                             {item.currentStock}
                                         </p>
                                     </div>

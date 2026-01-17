@@ -226,7 +226,7 @@ export default function CategoryDetailPage({ params }: { params: Promise<{ id: s
                             </div>
                             <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-6 shrink-0">
                                 <div className="text-right">
-                                    <p className={`text-xl sm:text-3xl font-black leading-none ${item.currentStock < 5 ? 'text-red-500' : 'text-slate-800'}`}>
+                                    <p className={`text-xl sm:text-3xl font-black leading-none ${item.currentStock < 2 ? 'text-red-500' : 'text-slate-800'}`}>
                                         {item.currentStock}
                                     </p>
                                     <p className="text-[8px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{item.unit}</p>

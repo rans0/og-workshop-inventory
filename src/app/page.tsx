@@ -57,7 +57,7 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  const lowStockItems = items.filter(i => i.currentStock < 5).slice(0, 3);
+  const lowStockItems = items.filter(i => i.currentStock < 2).slice(0, 3);
 
   return (
     <main className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8 pb-12">

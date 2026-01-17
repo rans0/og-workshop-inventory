@@ -198,7 +198,7 @@ export default function TransactionPage({ params }: { params: Promise<{ type: st
                                 </div>
                                 <div className="text-right border-l-2 border-blue-200 pl-4 sm:pl-6">
                                     <p className="text-[10px] sm:text-sm font-black text-blue-400 uppercase">Stok Saat Ini</p>
-                                    <p className={`text-2xl sm:text-5xl font-black leading-none ${selectedItem.currentStock < 5 ? 'text-red-600' : 'text-blue-700'}`}>
+                                    <p className={`text-2xl sm:text-5xl font-black leading-none ${selectedItem.currentStock < 2 ? 'text-red-600' : 'text-blue-700'}`}>
                                         {selectedItem.currentStock}
                                     </p>
                                 </div>
