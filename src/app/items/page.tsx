@@ -221,19 +221,19 @@ export default function ItemsPage() {
                 )}
             </div>
 
-            {/* Add/Edit Form */}
-            {(isAdding || editingItem) && (
-                <form onSubmit={editingItem ? updateItem : addItem} className="card space-y-4 border-blue-200 bg-blue-50/50 !p-4 sm:!p-6">
+            {/* Add Form */}
+            {isAdding && (
+                <form onSubmit={addItem} className="card space-y-4 border-green-200 bg-green-50/50 !p-4 sm:!p-6">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-lg sm:text-xl font-bold text-blue-800">
-                            {editingItem ? 'Edit Barang' : 'Barang Baru'}
+                        <h2 className="text-lg sm:text-xl font-bold text-green-800">
+                            Barang Baru
                         </h2>
                         <button
                             type="button"
-                            onClick={() => { setIsAdding(false); setEditingItem(null); }}
-                            className="p-2 hover:bg-blue-100 rounded-full"
+                            onClick={() => setIsAdding(false)}
+                            className="p-2 hover:bg-green-100 rounded-full"
                         >
-                            <X className="w-5 h-5 text-blue-600" />
+                            <X className="w-5 h-5 text-green-600" />
                         </button>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -269,23 +269,21 @@ export default function ItemsPage() {
                                 className="!p-3"
                             />
                         </div>
-                        {!editingItem && (
-                            <div>
-                                <label className="!text-sm">Stok Awal</label>
-                                <input
-                                    type="number"
-                                    value={formData.initialStock}
-                                    onChange={(e) => setFormData({ ...formData, initialStock: e.target.value })}
-                                    className="!p-3"
-                                />
-                            </div>
-                        )}
+                        <div>
+                            <label className="!text-sm">Stok Awal</label>
+                            <input
+                                type="number"
+                                value={formData.initialStock}
+                                onChange={(e) => setFormData({ ...formData, initialStock: e.target.value })}
+                                className="!p-3"
+                            />
+                        </div>
                     </div>
                     <button
                         type="submit"
-                        className="w-full p-4 bg-blue-600 text-white rounded-xl font-bold active:scale-95 transition-all"
+                        className="w-full p-4 bg-green-600 text-white rounded-xl font-bold active:scale-95 transition-all"
                     >
-                        {editingItem ? 'Simpan Perubahan' : 'Tambah Barang'}
+                        Tambah Barang
                     </button>
                 </form>
             )}
@@ -312,46 +310,112 @@ export default function ItemsPage() {
             ) : (
                 <div className="space-y-3">
                     {filteredItems.map((item) => (
-                        <div key={item.id} className="card flex items-start sm:items-center gap-3 sm:gap-6 !p-3 sm:!p-6 group">
-                            <div className="p-2 sm:p-4 bg-slate-100 rounded-lg sm:rounded-2xl shrink-0">
-                                <Package className="w-5 h-5 sm:w-10 sm:h-10 text-slate-400" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                                    <span className="text-[10px] sm:text-sm font-bold bg-slate-200 px-2 py-0.5 rounded uppercase text-slate-700 font-mono">
-                                        {item.code}
-                                    </span>
-                                    {item.categoryName && (
-                                        <span className="text-[10px] sm:text-sm font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded uppercase truncate max-w-[120px] sm:max-w-none">
-                                            {item.categoryName}
+                        <div key={item.id} className="space-y-3">
+                            <div className={`card flex items-start sm:items-center gap-3 sm:gap-6 !p-3 sm:!p-6 group transition-all ${editingItem?.id === item.id ? 'ring-4 ring-blue-100 border-blue-300' : ''}`}>
+                                <div className="p-2 sm:p-4 bg-slate-100 rounded-lg sm:rounded-2xl shrink-0">
+                                    <Package className="w-5 h-5 sm:w-10 sm:h-10 text-slate-400" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                                        <span className="text-[10px] sm:text-sm font-bold bg-slate-200 px-2 py-0.5 rounded uppercase text-slate-700 font-mono">
+                                            {item.code}
                                         </span>
+                                        {item.categoryName && (
+                                            <span className="text-[10px] sm:text-sm font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded uppercase truncate max-w-[120px] sm:max-w-none">
+                                                {item.categoryName}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <h3 className="text-base sm:text-3xl font-black text-slate-900 truncate sm:whitespace-normal group-hover:text-blue-600 transition-colors mb-1">
+                                        {item.name}
+                                    </h3>
+                                    {item.price > 0 && (
+                                        <p className="text-xs sm:text-lg text-slate-600 font-bold">
+                                            Harga: <span className="text-blue-600">{formatPrice(item.price)}</span>
+                                        </p>
                                     )}
                                 </div>
-                                <h3 className="text-base sm:text-3xl font-black text-slate-900 truncate sm:whitespace-normal group-hover:text-blue-600 transition-colors mb-1">
-                                    {item.name}
-                                </h3>
-                                {item.price > 0 && (
-                                    <p className="text-xs sm:text-lg text-slate-600 font-bold">
-                                        Harga: <span className="text-blue-600">{formatPrice(item.price)}</span>
-                                    </p>
-                                )}
-                            </div>
-                            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-6 shrink-0">
-                                <div className="text-right">
-                                    <p className="text-[10px] sm:text-sm font-black text-slate-500 uppercase tracking-tighter">STOK</p>
-                                    <p className={`text-2xl sm:text-5xl font-black leading-none ${item.currentStock < 5 ? 'text-red-600' : 'text-slate-900'}`}>
-                                        {item.currentStock}
-                                    </p>
-                                </div>
-                                <div className="flex flex-col gap-1 shrink-0">
-                                    <button
-                                        onClick={() => startEdit(item)}
-                                        className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
-                                    >
-                                        <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
-                                    </button>
+                                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-6 shrink-0">
+                                    <div className="text-right">
+                                        <p className="text-[10px] sm:text-sm font-black text-slate-500 uppercase tracking-tighter">STOK</p>
+                                        <p className={`text-2xl sm:text-5xl font-black leading-none ${item.currentStock < 5 ? 'text-red-600' : 'text-slate-900'}`}>
+                                            {item.currentStock}
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-col gap-1 shrink-0">
+                                        <button
+                                            onClick={() => editingItem?.id === item.id ? setEditingItem(null) : startEdit(item)}
+                                            className={`p-2 rounded-lg transition-colors ${editingItem?.id === item.id ? 'bg-blue-600 text-white' : 'text-blue-500 hover:bg-blue-50'}`}
+                                        >
+                                            <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+
+                            {/* Inline Edit Form */}
+                            {editingItem?.id === item.id && (
+                                <form onSubmit={updateItem} className="card space-y-4 border-blue-200 bg-blue-50/50 !p-4 sm:!p-6 animate-slide-up">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-lg font-bold text-blue-800">Edit Data Barang</h2>
+                                        <button
+                                            type="button"
+                                            onClick={() => setEditingItem(null)}
+                                            className="p-2 hover:bg-blue-100 rounded-full"
+                                        >
+                                            <X className="w-5 h-5 text-blue-600" />
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="!text-sm">Nama Barang</label>
+                                            <input
+                                                placeholder="Nama barang..."
+                                                value={formData.name}
+                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                                className="!p-3"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="!text-sm">Kategori</label>
+                                            <select
+                                                value={formData.categoryId}
+                                                onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                                                className="!p-3"
+                                            >
+                                                {categories.map(c => (
+                                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="sm:col-span-2">
+                                            <label className="!text-sm">Harga (Rp)</label>
+                                            <input
+                                                type="number"
+                                                placeholder="Harga..."
+                                                value={formData.price}
+                                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                                className="!p-3"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => setEditingItem(null)}
+                                            className="flex-1 p-4 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold active:scale-95 transition-all"
+                                        >
+                                            Batal
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="flex-3 p-4 bg-blue-600 text-white rounded-xl font-bold active:scale-95 transition-all"
+                                        >
+                                            Simpan Perubahan
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
                         </div>
                     ))}
                 </div>
