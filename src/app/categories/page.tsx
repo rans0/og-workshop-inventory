@@ -148,30 +148,9 @@ export default function CategoriesPage() {
                     <p className="text-center text-slate-400 py-10 italic">Belum ada kategori.</p>
                 ) : (
                     categories.map((cat) => (
-                        <div key={cat.id} className="p-4 sm:p-5 bg-white rounded-2xl shadow-sm border border-slate-200">
-                            {editingId === cat.id ? (
-                                <div className="flex gap-2">
-                                    <input
-                                        value={editName}
-                                        onChange={(e) => setEditName(e.target.value)}
-                                        className="flex-1 !p-3"
-                                        autoFocus
-                                    />
-                                    <button
-                                        onClick={() => updateCategory(cat.id)}
-                                        className="px-4 bg-green-600 text-white rounded-xl font-bold"
-                                    >
-                                        Simpan
-                                    </button>
-                                    <button
-                                        onClick={() => setEditingId(null)}
-                                        className="px-4 bg-slate-200 rounded-xl font-bold"
-                                    >
-                                        Batal
-                                    </button>
-                                </div>
-                            ) : (
-                                <Link href={`/categories/${cat.id}`} className="flex items-center gap-4 py-2">
+                        <div key={cat.id} className="space-y-3">
+                            <div className={`bg-white rounded-2xl shadow-sm border transition-all ${editingId === cat.id ? 'ring-4 ring-blue-100 border-blue-300' : 'border-slate-200'}`}>
+                                <Link href={`/categories/${cat.id}`} className="flex items-center gap-4 p-4 sm:p-5">
                                     <div className="p-4 bg-orange-50 rounded-2xl shrink-0">
                                         <Layers className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
                                     </div>
@@ -191,8 +170,8 @@ export default function CategoriesPage() {
                                     </div>
                                     <div className="flex items-center gap-1 shrink-0">
                                         <button
-                                            onClick={(e) => { e.preventDefault(); startEdit(cat); }}
-                                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-xl"
+                                            onClick={(e) => { e.preventDefault(); editingId === cat.id ? setEditingId(null) : startEdit(cat); }}
+                                            className={`p-2 rounded-xl transition-colors ${editingId === cat.id ? 'bg-blue-600 text-white' : 'text-blue-500 hover:bg-blue-50'}`}
                                         >
                                             <Pencil className="w-5 h-5" />
                                         </button>
@@ -205,6 +184,42 @@ export default function CategoriesPage() {
                                         <ChevronRight className="w-5 h-5 text-slate-300" />
                                     </div>
                                 </Link>
+                            </div>
+
+                            {/* Inline Edit Form */}
+                            {editingId === cat.id && (
+                                <form
+                                    onSubmit={(e) => { e.preventDefault(); updateCategory(cat.id); }}
+                                    className="card space-y-4 border-blue-200 bg-blue-50/50 !p-4 sm:!p-6 animate-slide-up"
+                                >
+                                    <div>
+                                        <label className="!text-sm">Nama Kategori</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                value={editName}
+                                                onChange={(e) => setEditName(e.target.value)}
+                                                className="flex-1 !p-3"
+                                                autoFocus
+                                                placeholder="Nama kategori..."
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => setEditingId(null)}
+                                            className="flex-1 p-4 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold active:scale-95 transition-all"
+                                        >
+                                            Batal
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="flex-2 p-4 bg-blue-600 text-white rounded-xl font-bold active:scale-95 transition-all"
+                                        >
+                                            Simpan Perubahan
+                                        </button>
+                                    </div>
+                                </form>
                             )}
                         </div>
                     ))
