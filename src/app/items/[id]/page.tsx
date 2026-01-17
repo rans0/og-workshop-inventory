@@ -185,12 +185,13 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
                                 <div className="flex-1 min-w-0">
                                     <p className="text-xs sm:text-sm font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
                                         <Calendar className="w-3.5 h-3.5" />
-                                        {new Date(tx.createdAt).toLocaleString('id-ID', {
+                                        {new Date(tx.createdAt.includes('T') ? tx.createdAt : tx.createdAt.replace(' ', 'T') + 'Z').toLocaleString('id-ID', {
                                             day: '2-digit',
                                             month: 'short',
                                             year: 'numeric',
                                             hour: '2-digit',
-                                            minute: '2-digit'
+                                            minute: '2-digit',
+                                            timeZone: 'Asia/Jakarta'
                                         })}
                                     </p>
                                     <p className="text-slate-800 font-bold truncate leading-snug">

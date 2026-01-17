@@ -96,11 +96,12 @@ export default function HistoryPage() {
                                     </span>
                                     <span className="text-xs sm:text-base text-slate-500 font-bold flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded-lg">
                                         <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
-                                        {new Date(tx.createdAt).toLocaleString('id-ID', {
+                                        {new Date(tx.createdAt.includes('T') ? tx.createdAt : tx.createdAt.replace(' ', 'T') + 'Z').toLocaleString('id-ID', {
                                             day: '2-digit',
                                             month: 'short',
                                             hour: '2-digit',
-                                            minute: '2-digit'
+                                            minute: '2-digit',
+                                            timeZone: 'Asia/Jakarta'
                                         })}
                                     </span>
                                 </div>

@@ -17,7 +17,9 @@ interface Transaction {
 }
 
 const formatTimeAgo = (dateStr: string) => {
-  const date = new Date(dateStr);
+  if (!dateStr) return '-';
+  // Standardize SQLite "YYYY-MM-DD HH:MM:SS" to ISO "YYYY-MM-DDTHH:MM:SSZ"
+  const date = new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T') + 'Z');
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   const minutes = Math.floor(diff / 60000);
@@ -25,7 +27,7 @@ const formatTimeAgo = (dateStr: string) => {
   if (minutes < 60) return `${minutes}m`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}j`;
-  return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+  return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', timeZone: 'Asia/Jakarta' });
 };
 
 export default function Dashboard() {

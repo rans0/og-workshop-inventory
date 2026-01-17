@@ -73,7 +73,7 @@ export default function ReportsPage() {
 
         const now = new Date();
         const filtered = transactions.filter(tx => {
-            const txDate = new Date(tx.createdAt);
+            const txDate = new Date(tx.createdAt.includes('T') ? tx.createdAt : tx.createdAt.replace(' ', 'T') + 'Z');
 
             if (activeTab === 'daily') {
                 return txDate.toDateString() === now.toDateString();
@@ -176,9 +176,9 @@ export default function ReportsPage() {
     const getPeriodLabel = () => {
         const now = new Date();
         switch (activeTab) {
-            case 'daily': return now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
+            case 'daily': return now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Asia/Jakarta' });
             case 'weekly': return '7 Hari Terakhir';
-            case 'monthly': return now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+            case 'monthly': return now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' });
             case 'yearly': return `Tahun ${now.getFullYear()}`;
             default: return 'Semua Waktu';
         }
