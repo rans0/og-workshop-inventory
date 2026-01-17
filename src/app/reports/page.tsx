@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, TrendingDown, ChevronDown, ChevronUp, Package, RefreshCw } from 'lucide-react';
+import { ArrowLeft, TrendingDown, ChevronDown, ChevronUp, Package, RefreshCw, Calendar as CalendarIcon, X, Trophy } from 'lucide-react';
 import Link from 'next/link';
 
-type ReportTab = 'daily' | 'weekly' | 'monthly' | 'yearly' | 'all';
 
 interface Transaction {
     id: string;
@@ -44,11 +43,19 @@ interface CategorySummary {
     expanded: boolean;
 }
 
+interface TopItem {
+    id: string;
+    name: string;
+    quantity: number;
+}
+
 export default function ReportsPage() {
-    const [activeTab, setActiveTab] = useState<ReportTab>('daily');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
     const [categorySummaries, setCategorySummaries] = useState<CategorySummary[]>([]);
+    const [topItems, setTopItems] = useState<TopItem[]>([]);
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -71,22 +78,29 @@ export default function ReportsPage() {
     useEffect(() => {
         if (transactions.length === 0) return;
 
-        const now = new Date();
         const filtered = transactions.filter(tx => {
+            if (!startDate && !endDate) return true;
+
+            // Parse txDate as UTC
             const txDate = new Date(tx.createdAt.includes('T') ? tx.createdAt : tx.createdAt.replace(' ', 'T') + 'Z');
 
-            if (activeTab === 'daily') {
-                return txDate.toDateString() === now.toDateString();
-            } else if (activeTab === 'weekly') {
-                const weekAgo = new Date(now);
-                weekAgo.setDate(weekAgo.getDate() - 7);
-                return txDate >= weekAgo;
-            } else if (activeTab === 'monthly') {
-                return txDate.getMonth() === now.getMonth() && txDate.getFullYear() === now.getFullYear();
-            } else if (activeTab === 'yearly') {
-                return txDate.getFullYear() === now.getFullYear();
+            // Get YYYY-MM-DD in Jakarta (using en-CA for reliable YYYY-MM-DD)
+            const formatter = new Intl.DateTimeFormat('en-CA', {
+                timeZone: 'Asia/Jakarta',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+            const jakartaDateStr = formatter.format(txDate);
+
+            if (startDate && endDate) {
+                return jakartaDateStr >= startDate && jakartaDateStr <= endDate;
+            } else if (startDate) {
+                return jakartaDateStr >= startDate;
+            } else if (endDate) {
+                return jakartaDateStr <= endDate;
             }
-            return true; // 'all'
+            return true;
         });
 
         // Group by category
@@ -157,7 +171,43 @@ export default function ReportsPage() {
         });
 
         setCategorySummaries(Array.from(categoryMap.values()));
-    }, [transactions, activeTab]);
+
+        // Calculate Top 3 Items Out
+        // 1. Determine day count for threshold
+        let dayCount = 1;
+        if (startDate && endDate) {
+            dayCount = Math.floor((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        } else if (filtered.length > 0) {
+            const dates = filtered.map(t => new Date(t.createdAt.includes('T') ? t.createdAt : t.createdAt.replace(' ', 'T') + 'Z').getTime());
+            const minDate = Math.min(...dates);
+            const maxDate = Math.max(...dates);
+            dayCount = Math.max(1, Math.floor((maxDate - minDate) / (1000 * 60 * 60 * 24)) + 1);
+        }
+
+        const threshold = 5 * dayCount;
+
+        // 2. Aggregate quantity out
+        const outMap = new Map<string, { name: string, qty: number }>();
+        filtered.filter(tx => tx.type === 'OUT' && !tx.notes?.includes('[ADJUSTMENT]')).forEach(tx => {
+            const current = outMap.get(tx.itemId) || { name: tx.itemName || 'Barang Terhapus', qty: 0 };
+            outMap.set(tx.itemId, {
+                name: current.name,
+                qty: current.qty + tx.quantity
+            });
+        });
+
+        // 3. Filter by threshold and sort
+        const sortedTop = Array.from(outMap.entries())
+            .map(([id, data]) => ({ id, name: data.name, quantity: data.qty }))
+            .filter(item => item.quantity >= threshold)
+            .sort((a, b) => {
+                if (b.quantity !== a.quantity) return b.quantity - a.quantity;
+                return a.name.localeCompare(b.name);
+            })
+            .slice(0, 3);
+
+        setTopItems(sortedTop);
+    }, [transactions, startDate, endDate]);
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('id-ID', {
@@ -174,14 +224,21 @@ export default function ReportsPage() {
     };
 
     const getPeriodLabel = () => {
-        const now = new Date();
-        switch (activeTab) {
-            case 'daily': return now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Asia/Jakarta' });
-            case 'weekly': return '7 Hari Terakhir';
-            case 'monthly': return now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' });
-            case 'yearly': return `Tahun ${now.getFullYear()}`;
-            default: return 'Semua Waktu';
+        if (!startDate && !endDate) return 'Semua Waktu';
+
+        if (startDate === endDate) {
+            return new Date(startDate).toLocaleDateString('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
         }
+
+        const startLabel = startDate ? new Date(startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Awal';
+        const endLabel = endDate ? new Date(endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Sekarang';
+
+        return `${startLabel} - ${endLabel}`;
     };
 
     const grandTotalIn = categorySummaries.reduce((sum, cat) => sum + cat.totalIn, 0);
@@ -189,14 +246,6 @@ export default function ReportsPage() {
     const grandTotalAdj = categorySummaries.reduce((sum, cat) => sum + cat.totalAdj, 0);
     const grandTotalInValue = categorySummaries.reduce((sum, cat) => sum + cat.totalInValue, 0);
     const grandTotalOutValue = categorySummaries.reduce((sum, cat) => sum + cat.totalOutValue, 0);
-
-    const tabLabels: Record<ReportTab, string> = {
-        daily: 'Hari',
-        weekly: 'Minggu',
-        monthly: 'Bulan',
-        yearly: 'Tahun',
-        all: 'Semua'
-    };
 
     return (
         <main className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6 pb-20">
@@ -215,20 +264,44 @@ export default function ReportsPage() {
                 </div>
             </header>
 
-            {/* Tab Switcher */}
-            <div className="flex p-1 sm:p-1.5 bg-slate-200 rounded-xl sm:rounded-2xl gap-0.5 sm:gap-1 overflow-x-auto">
-                {(Object.keys(tabLabels) as ReportTab[]).map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`flex-1 min-w-[50px] p-2 sm:p-3 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all ${activeTab === tab
-                            ? 'bg-white text-blue-600 shadow-sm'
-                            : 'text-slate-500'
-                            }`}
-                    >
-                        {tabLabels[tab]}
-                    </button>
-                ))}
+            {/* Date Filter Selection */}
+            <div className="card !p-4 sm:!p-6 bg-slate-50 border-slate-200">
+                <div className="flex flex-col sm:flex-row items-end gap-4">
+                    <div className="flex-1 w-full space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Mulai Tanggal</label>
+                        <div className="relative">
+                            <input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="w-full !p-3 !bg-white !rounded-xl !border-slate-200 !text-sm font-bold focus:!border-blue-500 focus:!ring-4 focus:!ring-blue-100 transition-all"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex-1 w-full space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Sampai Tanggal</label>
+                        <div className="relative">
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="w-full !p-3 !bg-white !rounded-xl !border-slate-200 !text-sm font-bold focus:!border-blue-500 focus:!ring-4 focus:!ring-blue-100 transition-all"
+                            />
+                        </div>
+                    </div>
+                    {(startDate || endDate) && (
+                        <button
+                            onClick={() => {
+                                setStartDate('');
+                                setEndDate('');
+                            }}
+                            className="p-3 bg-white border border-slate-200 text-red-500 rounded-xl hover:bg-red-50 hover:border-red-100 transition-colors shadow-sm shrink-0 flex items-center gap-2 font-bold text-sm"
+                        >
+                            <X className="w-4 h-4" />
+                            <span className="sm:hidden lg:inline">Reset</span>
+                        </button>
+                    )}
+                </div>
             </div>
 
             {loading ? (
@@ -280,7 +353,7 @@ export default function ReportsPage() {
                         </div>
 
                         {/* Koreksi Stok */}
-                        <div className="card border-slate-200 bg-slate-50 !p-4 flex flex-col gap-3 min-w-0 sm:col-span-2 lg:col-span-1">
+                        <div className="card border-slate-200 bg-slate-50 !p-4 flex flex-col gap-3 min-w-0">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 bg-slate-200 text-slate-500 rounded-xl shrink-0">
                                     <RefreshCw className="w-5 h-5" />
@@ -298,6 +371,38 @@ export default function ReportsPage() {
                                     Langsung memotong Modal
                                 </p>
                             </div>
+                        </div>
+
+                        {/* Top 3 Barang Card */}
+                        <div className="card border-yellow-200 bg-yellow-50/20 !p-4 flex flex-col gap-3 min-w-0 sm:col-span-2 lg:col-span-3">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-yellow-100 text-yellow-600 rounded-xl shrink-0">
+                                    <Trophy className="w-5 h-5" />
+                                </div>
+                                <div className="min-w-0 text-left">
+                                    <p className="text-[10px] font-black text-yellow-800 uppercase tracking-widest opacity-60">Barang Terlaris</p>
+                                    <p className="text-sm font-bold text-yellow-800">Top 3 Pengeluaran</p>
+                                </div>
+                            </div>
+
+                            {topItems.length === 0 ? (
+                                <p className="text-xs text-slate-400 font-bold italic py-2">Belum ada barang yang mencapai target penjualan.</p>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    {topItems.map((item, idx) => (
+                                        <div key={item.id} className="bg-white/60 border border-yellow-100 p-3 rounded-xl flex items-center justify-between gap-3">
+                                            <div className="min-w-0 flex items-center gap-2">
+                                                <span className="text-xl font-black text-yellow-500 italic opacity-50">#{idx + 1}</span>
+                                                <p className="font-bold text-slate-700 truncate text-sm">{item.name}</p>
+                                            </div>
+                                            <div className="text-right shrink-0">
+                                                <p className="text-lg font-black text-yellow-700 leading-none">{item.quantity}</p>
+                                                <p className="text-[8px] font-bold text-yellow-600 uppercase">pcs</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 
