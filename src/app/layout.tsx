@@ -40,7 +40,25 @@ export default function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js');
+                  navigator.serviceWorker.register('/sw.js').then(reg => {
+                    reg.addEventListener('updatefound', () => {
+                      const newWorker = reg.installing;
+                      newWorker?.addEventListener('statechange', () => {
+                        if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+                          window.location.reload();
+                        }
+                      });
+                    });
+                  });
+                });
+
+                // Take over the page immediately when a new SW is activated
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                  if (!refreshing) {
+                    window.location.reload();
+                    refreshing = true;
+                  }
                 });
               }
             `,
