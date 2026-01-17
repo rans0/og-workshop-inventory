@@ -13,17 +13,22 @@ export async function GET(request: Request) {
 
         const url = new URL(request.url);
         const limit = parseInt(url.searchParams.get('limit') || '100');
+        const itemId = url.searchParams.get('itemId');
 
-        const result = await db.prepare(`
+        const sql = `
             SELECT t.*, i.name as item_name, i.code as item_code, i.price as item_price, 
                    i.is_deleted as item_deleted, i.current_stock as item_stock,
                    c.name as category_name, c.id as category_id, c.is_deleted as category_deleted
             FROM transactions t 
             LEFT JOIN items i ON t.item_id = i.id 
             LEFT JOIN categories c ON i.category_id = c.id
+            ${itemId ? 'WHERE t.item_id = ?' : ''}
             ORDER BY t.created_at DESC
             LIMIT ?
-        `).bind(limit).all();
+        `;
+
+        const stmt = db.prepare(sql);
+        const result = await (itemId ? stmt.bind(itemId, limit) : stmt.bind(limit)).all();
 
         const transactions = result.results.map((row: Record<string, unknown>) => ({
             id: row.id,

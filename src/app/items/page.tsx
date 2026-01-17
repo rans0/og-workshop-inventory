@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Package, Pencil, X, Search } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 interface Category {
     id: string;
@@ -54,9 +55,21 @@ export default function ItemsPage() {
         }
     };
 
+    const searchParams = useSearchParams();
+    const editId = searchParams.get('edit');
+
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (editId && items.length > 0) {
+            const itemToEdit = items.find(i => i.id === editId);
+            if (itemToEdit) {
+                startEdit(itemToEdit);
+            }
+        }
+    }, [editId, items]);
 
     const formatPrice = (price: number) => {
         if (price === 0) return '';

@@ -19,7 +19,10 @@ export async function GET(
         const includeDeleted = url.searchParams.get('includeDeleted') === 'true';
 
         const result = await db.prepare(`
-            SELECT i.*, c.name as category_name 
+            SELECT 
+                i.id, i.code, i.name, i.category_id as category_id, 
+                i.current_stock, i.unit, i.price, i.last_updated_at,
+                c.name as category_name 
             FROM items i 
             LEFT JOIN categories c ON i.category_id = c.id
             WHERE i.id = ? ${includeDeleted ? '' : 'AND i.is_deleted = 0'}
@@ -35,9 +38,9 @@ export async function GET(
             name: result.name,
             categoryId: result.category_id,
             categoryName: result.category_name,
-            currentStock: result.current_stock,
+            currentStock: Number(result.current_stock || 0),
             unit: result.unit,
-            price: result.price || 0,
+            price: Number(result.price || 0),
             lastUpdatedAt: result.last_updated_at
         });
     } catch (err) {
