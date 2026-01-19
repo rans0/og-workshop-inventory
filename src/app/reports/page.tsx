@@ -168,17 +168,6 @@ export default function ReportsPage() {
 
         setCategorySummaries(Array.from(categoryMap.values()));
 
-        let dayCount = 1;
-        if (startDate && endDate) {
-            dayCount = Math.floor((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
-        } else if (filtered.length > 0) {
-            const dates = filtered.map(t => new Date(t.createdAt.includes('T') ? t.createdAt : t.createdAt.replace(' ', 'T') + 'Z').getTime());
-            const minDate = Math.min(...dates);
-            const maxDate = Math.max(...dates);
-            dayCount = Math.max(1, Math.floor((maxDate - minDate) / (1000 * 60 * 60 * 24)) + 1);
-        }
-
-        const threshold = 5 * dayCount;
 
         const outMap = new Map<string, { name: string, qty: number }>();
         filtered.filter(tx => tx.type === 'OUT' && !tx.notes?.includes('[ADJUSTMENT]')).forEach(tx => {
@@ -191,7 +180,6 @@ export default function ReportsPage() {
 
         const sortedTop = Array.from(outMap.entries())
             .map(([id, data]) => ({ id, name: data.name, quantity: data.qty }))
-            .filter(item => item.quantity >= threshold)
             .sort((a, b) => {
                 if (b.quantity !== a.quantity) return b.quantity - a.quantity;
                 return a.name.localeCompare(b.name);
@@ -372,7 +360,7 @@ export default function ReportsPage() {
                             </div>
 
                             {topItems.length === 0 ? (
-                                <p className="text-xs text-slate-400 font-bold italic py-2">Belum ada barang yang mencapai target penjualan.</p>
+                                <p className="text-xs text-slate-400 font-bold italic py-2">Belum ada pengeluaran untuk periode ini.</p>
                             ) : (
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     {topItems.map((item, idx) => (
