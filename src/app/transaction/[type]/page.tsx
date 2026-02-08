@@ -150,7 +150,7 @@ export default function TransactionPage({ params }: { params: Promise<{ type: st
                 <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                     {/* Category Filter */}
                     <div className="card !p-4 sm:!p-6">
-                        <label className="!text-lg sm:!text-xl font-black text-slate-500 uppercase tracking-wide mb-2 block">1. Filter Kategori</label>
+                        <label className="!text-lg sm:!text-xl font-black text-slate-500 uppercase tracking-wide mb-2 block">1. Pilih Kategori</label>
                         <div className="relative">
                             <select
                                 value={selectedCategoryId}
@@ -169,42 +169,57 @@ export default function TransactionPage({ params }: { params: Promise<{ type: st
                         </div>
                     </div>
 
-                    {/* Item Selection */}
-                    <div className="card !p-4 sm:!p-6">
-                        <label className="!text-lg sm:!text-xl font-black text-slate-500 uppercase tracking-wide mb-2 block">2. Pilih Barang</label>
-                        <div className="relative">
-                            <select
-                                value={selectedItemId}
-                                onChange={(e) => setSelectedItemId(e.target.value)}
-                                className="appearance-none pr-12 !p-4 sm:!p-5 !text-lg sm:!text-2xl font-bold bg-slate-50 border-2 border-slate-100 rounded-2xl"
-                            >
-                                <option value="">-- Pilih dari Daftar --</option>
-                                {filteredItems.map(item => (
-                                    <option key={item.id} value={item.id}>
-                                        {item.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-6 h-6 sm:w-8 sm:h-8" />
+                    {/* Item Selection - Grid Buttons */}
+                    {selectedCategoryId && (
+                        <div className="card !p-4 sm:!p-6">
+                            <label className="!text-lg sm:!text-xl font-black text-slate-500 uppercase tracking-wide mb-3 block">
+                                2. Pilih Barang
+                                <span className="text-sm font-bold text-slate-400 normal-case ml-2">
+                                    ({filteredItems.length} barang)
+                                </span>
+                            </label>
+                            {filteredItems.length === 0 ? (
+                                <p className="text-center text-slate-400 italic py-8">Tidak ada barang di kategori ini.</p>
+                            ) : (
+                                <div className="grid grid-cols-1 gap-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {filteredItems.map(item => (
+                                        <button
+                                            key={item.id}
+                                            type="button"
+                                            onClick={() => setSelectedItemId(item.id)}
+                                            className={`p-4 sm:p-5 rounded-2xl border-2 text-left transition-all active:scale-[0.98] ${
+                                                selectedItemId === item.id
+                                                    ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-200'
+                                                    : 'bg-white border-slate-200 hover:border-blue-300 hover:bg-blue-50/50'
+                                            }`}
+                                        >
+                                            <div className="flex items-center justify-between gap-3">
+                                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                    <div className={`p-2 sm:p-3 rounded-xl ${selectedItemId === item.id ? 'bg-blue-100' : 'bg-slate-100'}`}>
+                                                        <Package className={`w-6 h-6 sm:w-8 sm:h-8 ${selectedItemId === item.id ? 'text-blue-600' : 'text-slate-400'}`} />
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className={`font-black text-base sm:text-lg truncate ${selectedItemId === item.id ? 'text-blue-900' : 'text-slate-800'}`}>
+                                                            {item.name}
+                                                        </p>
+                                                        <p className="text-xs sm:text-sm font-bold text-slate-400 font-mono uppercase tracking-wider">
+                                                            {item.code}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right shrink-0">
+                                                    <p className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-400">Stok</p>
+                                                    <p className={`text-xl sm:text-3xl font-black leading-none ${item.currentStock < 2 ? 'text-red-600' : selectedItemId === item.id ? 'text-blue-700' : 'text-slate-700'}`}>
+                                                        {item.currentStock}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                        {selectedItem && (
-                            <div className="mt-4 p-4 sm:p-6 bg-blue-50 border-2 border-blue-100 rounded-2xl flex items-center justify-between">
-                                <div className="flex items-center gap-3 sm:gap-4">
-                                    <Package className="w-8 h-8 sm:w-12 sm:h-12 text-blue-500" />
-                                    <div>
-                                        <p className="font-black text-lg sm:text-2xl text-blue-900">{selectedItem.name}</p>
-                                        <p className="text-xs sm:text-lg font-bold text-blue-600">Kode: {selectedItem.code}</p>
-                                    </div>
-                                </div>
-                                <div className="text-right border-l-2 border-blue-200 pl-4 sm:pl-6">
-                                    <p className="text-[10px] sm:text-sm font-black text-blue-400 uppercase">Stok Saat Ini</p>
-                                    <p className={`text-2xl sm:text-5xl font-black leading-none ${selectedItem.currentStock < 2 ? 'text-red-600' : 'text-blue-700'}`}>
-                                        {selectedItem.currentStock}
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                    )}
 
                     {/* Quantity */}
                     <div className="card text-center !p-4 sm:!p-6">
