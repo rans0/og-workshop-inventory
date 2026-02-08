@@ -19,6 +19,10 @@ interface Transaction {
     quantity: number;
     notes: string;
     createdAt: string;
+    // Accounting fields - price at time of transaction
+    runningQty: number;
+    runningValue: number;
+    avgPrice: number;
 }
 
 interface CategorySummary {
