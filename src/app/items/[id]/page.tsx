@@ -23,6 +23,11 @@ interface Transaction {
     quantity: number;
     notes: string;
     createdAt: string;
+    // Accounting fields
+    itemPrice: number;
+    runningQty: number;
+    runningValue: number;
+    avgPrice: number;
 }
 
 export default function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -131,6 +136,37 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
                             </p>
                         </div>
                     </div>
+
+                    {/* Accounting Info Card */}
+                    {transactions.length > 0 && (
+                        <div className="card !p-4 sm:!p-6 space-y-3">
+                            <div className="flex items-center gap-2">
+                                <Package className="w-5 h-5 text-slate-400" />
+                                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Nilai Stok (Average Cost)</p>
+                            </div>
+                            {(() => {
+                                const lastTx = transactions[0];
+                                const avgPrice = lastTx?.avgPrice || 0;
+                                const runningValue = lastTx?.runningValue || 0;
+                                const runningQty = lastTx?.runningQty || 0;
+                                return (
+                                    <>
+                                        <div className="flex justify-between items-end">
+                                            <span className="text-sm font-medium text-slate-600">Harga Rata-rata:</span>
+                                            <span className="text-lg font-black text-slate-800">{avgPrice > 0 ? formatPrice(avgPrice) : '-'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-end">
+                                            <span className="text-sm font-medium text-slate-600">Total Nilai Stok:</span>
+                                            <span className="text-lg font-black text-blue-700">{runningValue > 0 ? formatPrice(runningValue) : '-'}</span>
+                                        </div>
+                                        <div className="pt-2 border-t border-slate-100 text-[10px] text-slate-400">
+                                            {runningQty} unit @ {avgPrice > 0 ? formatPrice(avgPrice) : 'Rp 0'}
+                                        </div>
+                                    </>
+                                );
+                            })()}
+                        </div>
+                    )}
                     <Link
                         href={`/items?edit=${item.id}`}
                         className="card flex items-center justify-between !p-4 sm:!p-6 hover:bg-slate-50 transition-colors"
@@ -203,6 +239,11 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
                                         {tx.type === 'IN' ? '+' : '-'}{tx.quantity}
                                     </p>
                                     <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">pcs</p>
+                                    {tx.itemPrice > 0 && (
+                                        <p className="text-[10px] sm:text-xs font-medium text-slate-500 mt-1">
+                                            @ {formatPrice(tx.itemPrice)}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         ))}

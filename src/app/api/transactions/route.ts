@@ -15,11 +15,14 @@ export async function GET(request: Request) {
         const itemId = url.searchParams.get('itemId');
 
         const sql = `
-            SELECT t.*, i.name as item_name, i.code as item_code, i.price as item_price, 
-                   i.is_deleted as item_deleted, i.current_stock as item_stock,
-                   c.name as category_name, c.id as category_id, c.is_deleted as category_deleted
-            FROM transactions t 
-            LEFT JOIN items i ON t.item_id = i.id 
+            SELECT
+                t.id, t.item_id, t.type, t.quantity, t.notes, t.created_at,
+                t.price, t.running_qty, t.running_value, t.avg_price,
+                i.name as item_name, i.code as item_code, i.price as item_price,
+                i.is_deleted as item_deleted, i.current_stock as item_stock,
+                c.name as category_name, c.id as category_id, c.is_deleted as category_deleted
+            FROM transactions t
+            LEFT JOIN items i ON t.item_id = i.id
             LEFT JOIN categories c ON i.category_id = c.id
             ${itemId ? 'WHERE t.item_id = ?' : ''}
             ORDER BY t.created_at DESC
@@ -34,7 +37,7 @@ export async function GET(request: Request) {
             itemId: row.item_id,
             itemName: row.item_name,
             itemCode: row.item_code,
-            itemPrice: row.item_price || 0,
+            itemPrice: (row.price || row.item_price || 0) as number,
             itemDeleted: row.item_deleted,
             itemStock: row.item_stock || 0,
             categoryId: row.category_id,
@@ -43,7 +46,11 @@ export async function GET(request: Request) {
             type: row.type,
             quantity: row.quantity,
             notes: row.notes,
-            createdAt: row.created_at
+            createdAt: row.created_at,
+            // Accounting fields
+            runningQty: row.running_qty || 0,
+            runningValue: row.running_value || 0,
+            avgPrice: row.avg_price || 0,
         }));
 
         return NextResponse.json(transactions);
@@ -73,21 +80,40 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'type must be IN or OUT' }, { status: 400 });
         }
 
-        const item = await db.prepare(`SELECT id FROM items WHERE id = ? AND is_deleted = 0`).bind(itemId).first();
+        const item = await db.prepare(`SELECT id, price, current_stock FROM items WHERE id = ? AND is_deleted = 0`).bind(itemId).first();
         if (!item) {
             return NextResponse.json({ error: 'Item tidak ditemukan atau sudah dihapus' }, { status: 404 });
         }
 
         const id = crypto.randomUUID();
+        const currentPrice = (item.price as number) || 0;
+
+        // Get previous transaction's running values for accounting
+        const prevTx = await db.prepare(`
+            SELECT running_qty, running_value
+            FROM transactions
+            WHERE item_id = ?
+            ORDER BY created_at DESC
+            LIMIT 1
+        `).bind(itemId).first() as { running_qty?: number; running_value?: number } | null;
+
+        const prevQty = prevTx?.running_qty || 0;
+        const prevValue = prevTx?.running_value || 0;
+
+        const qtyDelta = type === 'IN' ? quantity : -quantity;
+        const valueDelta = qtyDelta * currentPrice;
+        const newQty = prevQty + qtyDelta;
+        const newValue = prevValue + valueDelta;
+        const newAvgPrice = newQty !== 0 ? newValue / newQty : 0;
 
         await db.prepare(`
-            INSERT INTO transactions (id, item_id, type, quantity, notes, sync_status)
-            VALUES (?, ?, ?, ?, ?, 'SYNCED')
-        `).bind(id, itemId, type, quantity, notes).run();
+            INSERT INTO transactions (id, item_id, type, quantity, price, running_qty, running_value, avg_price, notes, sync_status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'SYNCED')
+        `).bind(id, itemId, type, quantity, currentPrice, newQty, newValue, newAvgPrice, notes).run();
 
         const stockDelta = type === 'IN' ? quantity : -quantity;
         await db.prepare(`
-            UPDATE items 
+            UPDATE items
             SET current_stock = current_stock + ?, last_updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         `).bind(stockDelta, itemId).run();
